@@ -70,7 +70,7 @@ defmodule CryptoScanner.Binance do
 
           coin = new_stat || c
 
-          Map.put(coin, "prices", c.prices)
+          Map.put(coin, "prices", c["prices"])
         end)
 
     new_coins = stats
