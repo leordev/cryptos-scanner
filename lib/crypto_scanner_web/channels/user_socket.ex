@@ -3,6 +3,7 @@ defmodule CryptoScannerWeb.UserSocket do
 
   ## Channels
   # channel "room:*", CryptoScannerWeb.RoomChannel
+  channel "scanner:*", CryptoScannerWeb.ScannerChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket

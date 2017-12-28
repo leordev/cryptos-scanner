@@ -1,15 +1,19 @@
 defmodule CryptoScanner.ExchangeServer do
   use GenServer
+
+  require Logger
+
   alias CryptoScanner.Exchange
   alias CryptoScanner.Binance
 
   def start_link(options) do
+
     [name: name] = options
     GenServer.start_link __MODULE__, name, options
   end
 
   def init(name) do
-
+    Logger.info(">>>>> Starting Exchange Server #{name}")
     {exchange_time, coins} =
       case name do
         :binance ->
@@ -35,7 +39,7 @@ defmodule CryptoScanner.ExchangeServer do
   end
 
   def handle_info(:perform_update_coins, state) do
-    GenServer.cast(self(), :update_coins)
+    GenServer.cast({state.name, node()}, :update_coins)
     schedule_coins()
     {:noreply, state}
   end
@@ -50,6 +54,10 @@ defmodule CryptoScanner.ExchangeServer do
 
   def get_coin(pid, symbol) do
     GenServer.call(pid, {:get_coin, symbol})
+  end
+
+  def get_hot(pid, period, value \\ -9) do
+    GenServer.call(pid, {:get_hot, period, value})
   end
 
   def get_coins(pid) do
@@ -68,6 +76,10 @@ defmodule CryptoScanner.ExchangeServer do
     {:reply, {:ok, coin}, state}
   end
 
+  def handle_call({:get_hot, period, value}, _from, state) do
+    {:reply, {:ok, calc_hot(state.coins, period, value)}, state}
+  end
+
   def handle_call(:get_status, _from, state) do
     {:reply, {:ok, state.status}, state}
   end
@@ -79,7 +91,7 @@ defmodule CryptoScanner.ExchangeServer do
   def handle_cast(:update_coins, state) do
     tick = state.tick + 1
 
-    IO.puts(">>>>> Preparing for Binance coins routine on tick #{tick}")
+    Logger.info(">>>>> Preparing for Binance coins routine on tick #{tick}")
 
     check_stats = Integer.mod(tick, 4) == 0
 
@@ -89,7 +101,17 @@ defmodule CryptoScanner.ExchangeServer do
           Binance.get_coins(state.coins, check_stats)
       end
 
+    CryptoScannerWeb.Endpoint.broadcast("scanner:alerts", "tick_alert", %{"exchange" => state.name})
+
     {:noreply, %{ state | coins: coins, tick: tick }}
+  end
+
+  def calc_hot(coins, period, value) do
+    coins
+      |> Enum.filter(fn c ->
+        percent = c["period_" <> period]["percentage"]
+        (value < 0 && percent <= value) || (value > 0 && percent >= value)
+      end)
   end
 
 end
