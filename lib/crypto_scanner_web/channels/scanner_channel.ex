@@ -5,7 +5,7 @@ defmodule CryptoScannerWeb.ScannerChannel do
 
   intercept ["tick_alert"]
 
-  @initial_filter %{"period" => "3m", "value" => -9}
+  @initial_filter %{"period" => "3m", "percentage" => -9, "volume" => 10}
 
   def join("scanner:alerts", _msg, socket) do
     socket = assign(socket, :filter, @initial_filter)
@@ -20,9 +20,12 @@ defmodule CryptoScannerWeb.ScannerChannel do
   end
 
   def handle_out("tick_alert", %{"exchange" => exchange}, socket) do
-    %{"period" => period, "value" => value} = socket.assigns[:filter]
+    %{
+      "period" => period,
+      "percentage" => percentage
+    } = socket.assigns[:filter]
 
-    {:ok, coins} = ExchangeServer.get_hot(exchange, period, value)
+    {:ok, coins} = ExchangeServer.get_hot(exchange, period, percentage)
 
     coins = %{coins: coins}
 

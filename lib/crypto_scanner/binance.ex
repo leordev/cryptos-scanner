@@ -4,15 +4,24 @@ defmodule CryptoScanner.Binance do
 
   @url "https://api.binance.com/api"
 
-  def get_time() do
-    url = "#{@url}/v1/time"
+  def get_info() do
+    url = "#{@url}/v1/exchangeInfo"
+      Logger.info(">>> Binance reading Exchange info")
 
-    response = HTTPotion.get url
+    response = case HTTPotion.get url, [timeout: 10_000] do
+      %HTTPotion.ErrorResponse{message: message} ->
+        Logger.info("Fail to read exchange info: " <> message)
+        get_info()
+      %{body: body} ->
+        Poison.decode!(body)
+    end
 
-    body = Poison.decode!(response.body)
+    response
+  end
 
+  def get_time(exchange_info) do
     os_time = Integer.floor_div(System.os_time, 1000000)
-    body["serverTime"] - os_time
+    exchange_info["serverTime"] - os_time
   end
 
   def get_prices() do
@@ -48,21 +57,21 @@ defmodule CryptoScanner.Binance do
 
     url = "#{@url}/v1/ticker/24hr"
 
-    case HTTPotion.get url do
+    case HTTPotion.get url, [timeout: 10_000] do
       %HTTPotion.ErrorResponse{message: message} ->
         Logger.info(">>>> Binance fail to get 24hs stats")
         Logger.info(message)
-        []
+        get_24h_stats()
       %{body: body} ->
         Poison.decode!(body)
     end
   end
 
-  def get_coins(coins, check_stats) do
+  def get_coins(coins, check_stats, exchange_info) do
     Logger.info(">>>>> Binance coins routine")
 
     new_coins = if check_stats do
-      update_coins(coins)
+      update_coins(coins, exchange_info)
     else
       coins
     end
@@ -94,7 +103,7 @@ defmodule CryptoScanner.Binance do
           |> hd
           |> Map.get("price")
 
-        updated_coin =  coin
+        updated_coin = coin
           |> Map.put("prices", new_prices)
           |> Map.put("last_price", last_price)
 
@@ -106,7 +115,7 @@ defmodule CryptoScanner.Binance do
     final
   end
 
-  defp update_coins(coins) do
+  defp update_coins(coins, exchange_info) do
     stats = get_24h_stats()
 
     updated_coins = coins
@@ -115,18 +124,40 @@ defmodule CryptoScanner.Binance do
               s["symbol"] == c["symbol"]
           end)
 
-          coin = new_stat || c
+          coin = if new_stat != nil do
+            new_stat
+              |> Map.put("quote", c["quote"])
+              |> Map.put("base", c["base"])
+          else
+            c
+          end
 
           Map.put(coin, "prices", c["prices"])
         end)
 
     new_coins = stats
       |> Enum.filter(fn c ->
-        total = updated_coins
-          |> Enum.filter(fn o -> o["symbol"] == c["symbol"] end)
-          |> Enum.count
-        total < 1
-      end)
+          total = updated_coins
+            |> Enum.filter(fn o -> o["symbol"] == c["symbol"] end)
+            |> Enum.count
+
+          info = exchange_info["symbols"]
+            |> Enum.find(nil, fn i ->
+              i["symbol"] == c["symbol"]
+            end)
+
+          total < 1 && info
+        end)
+      |> Enum.map(fn c ->
+          info = exchange_info["symbols"]
+            |> Enum.find(nil, fn i ->
+              i["symbol"] == c["symbol"]
+            end)
+
+          c
+            |> Map.put("base", info["baseAsset"])
+            |> Map.put("quote", info["quoteAsset"])
+        end)
 
     Logger.info('>>>>> Binance: #{Enum.count(updated_coins)} coins updated and #{Enum.count(new_coins)} new coins added')
 
@@ -137,16 +168,18 @@ defmodule CryptoScanner.Binance do
     coin
       |> Map.put("period_3m", calc_price_percentage_time(coin, 3))
       |> Map.put("period_5m", calc_price_percentage_time(coin, 5))
+      |> Map.put("period_10m", calc_price_percentage_time(coin, 10))
+      |> Map.put("period_15m", calc_price_percentage_time(coin, 15))
       |> Map.put("period_30m", calc_price_percentage_time(coin, 30))
       |> Map.put("period_1h", calc_price_percentage_time(coin, 60))
   end
 
   defp calc_price_percentage_time(coin, time) do
-    time = System.os_time - (time * 60 * 1000 * 1_000_000)
+    time = div(System.os_time - (time * 60 * 1000 * 1_000_000), 1_000_000)
 
     prices = coin["prices"]
       |> Enum.filter(&(&1["time"] >= time))
-      |> Enum.map(&(Float.parse(&1["price"]) |> elem(0)))
+      |> Enum.map(&(&1["price"]))
 
     if Enum.count(prices) > 0 do
       prices_max = prices |> Enum.max
@@ -158,12 +191,16 @@ defmodule CryptoScanner.Binance do
         0
       end
 
-      %{
+      res = %{
         "min" => prices_min,
         "max" => prices_max,
         "diff" => prices_diff,
         "percentage" => prices_percentage
       }
+
+      # Logger.info("Price #{coin["symbol"]} - #{inspect(res)}")
+
+      res
     else
       %{
         "min" => 0,
