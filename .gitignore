@@ -16,3 +16,7 @@ erl_crash.dump
 /config/*.secret.exs
 
 .DS_Store
+node_modules
+elm-stuff
+
+.env

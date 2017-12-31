@@ -5,6 +5,10 @@
 # is restricted to this project.
 use Mix.Config
 
+config :crypto_scanner, CryptoScanner.CoinigyServer,
+  coinigy_api_key: System.get_env("COINIGY_API_KEY"),
+  coinigy_api_secret: System.get_env("COINIGY_API_SECRET")
+
 # Configures the endpoint
 config :crypto_scanner, CryptoScannerWeb.Endpoint,
   url: [host: "localhost"],

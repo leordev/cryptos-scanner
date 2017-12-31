@@ -22,8 +22,9 @@ defmodule CryptoScannerWeb.Router do
   scope "/api", CryptoScannerWeb do
     pipe_through :api
 
-    get "/binance", BinanceController, :get
-    get "/binance/charts/:symbol", BinanceController, :charts
-    get "/binance/hot/:period/:value", BinanceController, :hot
+    get "/coinigy", CoinigyController, :get
+    # get "/binance", BinanceController, :get
+    # get "/binance/charts/:symbol", BinanceController, :charts
+    # get "/binance/hot/:period/:value", BinanceController, :hot
   end
 end

@@ -12,13 +12,25 @@ defmodule CryptoScanner.Application do
       supervisor(CryptoScannerWeb.Endpoint, []),
       # Start your own worker by calling: CryptoScanner.Worker.start_link(arg1, arg2, arg3)
       # worker(CryptoScanner.Worker, [arg1, arg2, arg3]),
-      worker(CryptoScanner.ExchangeServer, [[name: :binance]])
+      # worker(CryptoScanner.ExchangeServer, [[name: :binance]])
+      worker(CryptoScanner.CoinigyServer, [[name: :coinigy]])
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: CryptoScanner.Supervisor]
-    Supervisor.start_link(children, opts)
+    response = Supervisor.start_link(children, opts)
+
+
+    # TODO: create an option in UI to set this up
+    Process.sleep(5000)
+    CryptoScanner.CoinigyServer.subscribe_to_channels(:coinigy, "PLNX", "USD")
+    CryptoScanner.CoinigyServer.subscribe_to_channels(:coinigy, "HITB", "USD")
+    CryptoScanner.CoinigyServer.subscribe_to_channels(:coinigy, "HITB", "ETH")
+    CryptoScanner.CoinigyServer.subscribe_to_channels(:coinigy, "LIQU", "BTC")
+    CryptoScanner.CoinigyServer.subscribe_to_channels(:coinigy, "BINA", "BTC")
+
+    response
   end
 
   # Tell Phoenix to update the endpoint configuration
