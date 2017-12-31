@@ -23,6 +23,8 @@ defmodule CryptoScannerWeb.Router do
     pipe_through :api
 
     get "/coinigy", CoinigyController, :get
+    get "/coinigy/exchanges", CoinigyController, :get_exchanges
+    get "/coinigy/my-markets", CoinigyController, :get_markets
     # get "/binance", BinanceController, :get
     # get "/binance/charts/:symbol", BinanceController, :charts
     # get "/binance/hot/:period/:value", BinanceController, :hot

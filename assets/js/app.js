@@ -8,12 +8,12 @@ const STORAGE_KEY = "CTB_USER";
 const storageBody = localStorage.getItem(STORAGE_KEY);
 const flags = !storageBody ?
   { user: {
-    id: "",
+    id: "TODO: FIX",
     email: "",
     name: "",
-    apiKey: "",
-    apiSecret: "",
-    apiChannelKey: ""
+    apiKey: "TODO: FIX",
+    apiSecret: "TODO: FIX",
+    apiChannelKey: "TODO: FIX"
     },
     exchanges: []
   } : JSON.parse(storageBody)

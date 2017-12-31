@@ -88,12 +88,12 @@ var STORAGE_KEY = "CTB_USER";
 
 var storageBody = localStorage.getItem(STORAGE_KEY);
 var flags = !storageBody ? { user: {
-    id: "",
+    id: "TODO: FIX",
     email: "",
     name: "",
-    apiKey: "",
-    apiSecret: "",
-    apiChannelKey: ""
+    apiKey: "TODO: FIX",
+    apiSecret: "TODO: FIX",
+    apiChannelKey: "TODO: FIX"
   },
   exchanges: []
 } : JSON.parse(storageBody);
@@ -16069,7 +16069,6 @@ var _user$project$Main$selectInput = F6(
 				}
 			});
 	});
-var _user$project$Main$proxyUrl = 'http://localhost:3031';
 var _user$project$Main$handleResponseErrors = F3(
 	function (model, err, msg) {
 		var error = function () {
@@ -16862,7 +16861,7 @@ var _user$project$Main$WatchListResponse = function (a) {
 	return {ctor: 'WatchListResponse', _0: a};
 };
 var _user$project$Main$getWatchList = function (model) {
-	var url = A2(_elm_lang$core$Basics_ops['++'], _user$project$Main$proxyUrl, '/userWatchList');
+	var url = '/api/coinigy/my-markets';
 	var apiSecret = A2(_elm_lang$http$Http$header, 'X-API-SECRET', model.user.apiSecret);
 	var apiKey = A2(_elm_lang$http$Http$header, 'X-API-KEY', model.user.apiKey);
 	var request = _elm_lang$http$Http$request(
@@ -16901,7 +16900,7 @@ var _user$project$Main$updateUserSetup = function (model) {
 			_1: _elm_lang$core$Platform_Cmd$none
 		};
 	} else {
-		var url = A2(_elm_lang$core$Basics_ops['++'], _user$project$Main$proxyUrl, '/userInfo');
+		var url = '/api/coinigy/userInfo';
 		var apiSecret = A2(_elm_lang$http$Http$header, 'X-API-SECRET', model.user.apiSecret);
 		var apiKey = A2(_elm_lang$http$Http$header, 'X-API-KEY', model.user.apiKey);
 		var request = _elm_lang$http$Http$request(
@@ -17291,7 +17290,7 @@ var _user$project$Main$ExchangesResponse = function (a) {
 	return {ctor: 'ExchangesResponse', _0: a};
 };
 var _user$project$Main$listExchanges = function (model) {
-	var url = A2(_elm_lang$core$Basics_ops['++'], _user$project$Main$proxyUrl, '/exchanges');
+	var url = '/api/coinigy/exchanges';
 	var apiSecret = A2(_elm_lang$http$Http$header, 'X-API-SECRET', model.user.apiSecret);
 	var apiKey = A2(_elm_lang$http$Http$header, 'X-API-KEY', model.user.apiKey);
 	var request = _elm_lang$http$Http$request(
@@ -17524,8 +17523,7 @@ var _user$project$Main$topMenu = function (model) {
 						_0: _user$project$Main$loadingIcon(model),
 						_1: {
 							ctor: '::',
-							_0: _elm_lang$html$Html$text(
-								A2(_elm_lang$core$Basics_ops['++'], 'Hello, ', model.user.name)),
+							_0: _elm_lang$html$Html$text('Hello!'),
 							_1: {ctor: '[]'}
 						}
 					}),
@@ -17538,57 +17536,34 @@ var _user$project$Main$topMenu = function (model) {
 							_0: _elm_lang$html$Html_Attributes$class('navbar-item'),
 							_1: {
 								ctor: '::',
-								_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$Logout),
+								_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$ToggleSound),
 								_1: {ctor: '[]'}
 							}
 						},
 						{
 							ctor: '::',
-							_0: A3(_user$project$Main$icon, 'sign-out', false, false),
-							_1: {
-								ctor: '::',
-								_0: _elm_lang$html$Html$text('Logout'),
-								_1: {ctor: '[]'}
-							}
-						}),
-					_1: {
-						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$a,
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$class('navbar-item'),
-								_1: {
+							_0: A2(
+								_elm_lang$html$Html$span,
+								{
 									ctor: '::',
-									_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$ToggleSound),
+									_0: _elm_lang$html$Html_Attributes$class('navbar-item icon is-small'),
 									_1: {ctor: '[]'}
-								}
-							},
-							{
-								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$span,
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$class('navbar-item icon is-small'),
-										_1: {ctor: '[]'}
-									},
-									{
-										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$i,
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$class(soundIcon),
-												_1: {ctor: '[]'}
-											},
-											{ctor: '[]'}),
-										_1: {ctor: '[]'}
-									}),
-								_1: {ctor: '[]'}
-							}),
-						_1: {ctor: '[]'}
-					}
+								},
+								{
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$i,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class(soundIcon),
+											_1: {ctor: '[]'}
+										},
+										{ctor: '[]'}),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
 				}
 			};
 		}
@@ -18353,7 +18328,7 @@ var _user$project$Main$subscriptions = function (model) {
 	return (!_elm_lang$core$String$isEmpty(model.user.id)) ? _elm_lang$core$Platform_Sub$batch(
 		{
 			ctor: '::',
-			_0: A2(_elm_lang$core$Time$every, 5 * _elm_lang$core$Time$second, _user$project$Main$UpdateWatchMarket),
+			_0: A2(_elm_lang$core$Time$every, 60 * _elm_lang$core$Time$second, _user$project$Main$UpdateWatchMarket),
 			_1: {
 				ctor: '::',
 				_0: _user$project$Main$coinigySocketConnection(_user$project$Main$CoinigySocketConnection),

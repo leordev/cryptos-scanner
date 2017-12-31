@@ -394,7 +394,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     if not (String.isEmpty model.user.id) then
         Sub.batch
-            [ Time.every (5 * Time.second) UpdateWatchMarket
+            [ Time.every (60 * Time.second) UpdateWatchMarket
             , coinigySocketConnection CoinigySocketConnection
             , receiveTrade (handleTrade model)
             , receiveOrder (handleOrder model)
@@ -906,9 +906,10 @@ watchListCoinDecoder =
             )
 
 
-proxyUrl : String
-proxyUrl =
-    "http://localhost:3031"
+
+-- proxyUrl : String
+-- proxyUrl =
+--     "http://localhost:3031"
 
 
 getWatchList : Model -> Cmd Msg
@@ -921,7 +922,7 @@ getWatchList model =
             Http.header "X-API-SECRET" model.user.apiSecret
 
         url =
-            proxyUrl ++ "/userWatchList"
+            "/api/coinigy/my-markets"
 
         request =
             Http.request
@@ -950,7 +951,7 @@ listExchanges model =
             Http.header "X-API-SECRET" model.user.apiSecret
 
         url =
-            proxyUrl ++ "/exchanges"
+            "/api/coinigy/exchanges"
 
         request =
             Http.request
@@ -985,7 +986,7 @@ updateUserSetup model =
                 Http.header "X-API-SECRET" model.user.apiSecret
 
             url =
-                proxyUrl ++ "/userInfo"
+                "/api/coinigy/userInfo"
 
             request =
                 Http.request
@@ -1527,15 +1528,18 @@ topMenu model =
                 in
                     [ p [ class "navbar-item" ]
                         [ loadingIcon model
-                        , text ("Hello, " ++ model.user.name)
+                        , text ("Hello!")
+
+                        -- , text ("Hello, " ++ model.user.name)
                         ]
-                    , a
-                        [ class "navbar-item"
-                        , onClick Logout
-                        ]
-                        [ icon "sign-out" False False
-                        , text "Logout"
-                        ]
+
+                    -- , a
+                    --     [ class "navbar-item"
+                    --     , onClick Logout
+                    --     ]
+                    --     [ icon "sign-out" False False
+                    --     , text "Logout"
+                    --     ]
                     , a
                         [ class "navbar-item"
                         , onClick ToggleSound
