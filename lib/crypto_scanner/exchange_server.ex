@@ -125,7 +125,7 @@ defmodule CryptoScanner.ExchangeServer do
 
         if new_coin != nil && last_price["price"] !== new_coin["price"] do
 
-          Logger.info("Adding a new price #{inspect(new_coin)} over #{inspect(last_price)}")
+          # Logger.info("Adding a new price #{inspect(new_coin)} over #{inspect(last_price)}")
 
           prices = [new_coin | (c["prices"] || [])]
             |> Enum.take(60*60*2)

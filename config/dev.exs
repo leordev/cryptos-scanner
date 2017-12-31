@@ -11,7 +11,19 @@ config :crypto_scanner, CryptoScannerWeb.Endpoint,
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
-  watchers: []
+  watchers: [npm: ["start", cd: Path.expand("../assets", __DIR__)]]
+
+# Watch static and templates for browser reloading.
+config :crypto_scanner, CryptoScannerWeb.Endpoint,
+  live_reload: [
+    patterns: [
+      ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
+      ~r{priv/gettext/.*(po)$},
+      ~r{lib/crypto_scanner_web/views/.*(ex)$},
+      ~r{lib/crypto_scanner_web/templates/.*(eex)$}
+    ]
+  ]
+
 
 # ## SSL Support
 #

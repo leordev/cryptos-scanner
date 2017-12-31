@@ -1,0 +1,68 @@
+/* This file is for your main application css. */
+@import url('https://fonts.googleapis.com/css?family=Gloria+Hallelujah');
+
+@import url('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
+
+// chart
+path.candle {
+    stroke: #000000;
+}
+
+path.candle.body {
+    stroke-width: 0;
+}
+
+path.candle.up {
+    fill: #00AA00;
+    stroke: #00AA00;
+}
+
+path.candle.down {
+    fill: #FF0000;
+    stroke: #FF0000;
+}
+
+@import "~bulma/sass/utilities/initial-variables";
+@import "~bulma/sass/utilities/functions";
+
+// layout
+form {
+  margin-bottom: 20px;
+}
+
+.filter-link {
+  color: $blue;
+  border-bottom: 1px dashed $blue;
+}
+
+.logo {
+  font-family: 'Gloria Hallelujah', cursive;
+  font-size: 40px;
+  margin: 24px;
+}
+
+.exchange-selector {
+  height: 100px;
+  cursor: pointer;
+}
+
+.exchange-selector.selected {
+  background-color: $green;
+  color: white;
+}
+
+.footer {
+  margin-top: 50px;
+}
+
+@media screen and (min-width: 769px) {
+  // .sound-link {
+  //   margin-top: -20px;
+  //   margin-left: 20px;
+  // }
+
+  .coin-column {
+    min-width: 500px;
+    max-width: 550px;
+  }
+}
