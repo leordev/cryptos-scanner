@@ -38,6 +38,12 @@ app.ports.deleteUser.subscribe(function(){
   localStorage.removeItem(STORAGE_KEY);
 });
 
+app.ports.setTitle.subscribe(function(title) {
+  if (document.title != title) {
+      document.title = title;
+  }
+})
+
 // app.ports.setFilter.subscribe(filter => {
 //   console.log("Setting filter >>>>> ", filter)
 //   channel.push("set_filter", filter)

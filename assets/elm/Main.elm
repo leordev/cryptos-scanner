@@ -254,6 +254,12 @@ port deleteUser : () -> Cmd msg
 port startSockets : { user : User, exchanges : List Coin } -> Cmd msg
 
 
+port setTitle : String -> Cmd msg
+
+
+port notifySound : String -> Cmd msg
+
+
 
 -- port setFilter : Va -> Cmd msg
 
@@ -310,89 +316,88 @@ parseTradeType tradeTypeTxt =
         Buy
 
 
-handleTrade : Model -> JD.Value -> Msg
-handleTrade model val =
-    let
-        toDecoder exchange market price quantity tradeTypeTxt time id =
-            case (getMarketId model exchange market) of
-                Just marketId ->
-                    JD.succeed
-                        (Transaction id
-                            (parseTradeType tradeTypeTxt)
-                            price
-                            quantity
-                            time
-                            marketId
-                        )
 
-                Nothing ->
-                    JD.fail
-                        ("Trade - Invalid exchange Id for "
-                            ++ exchange
-                            ++ "-"
-                            ++ market
-                        )
-
-        transaction =
-            JD.decodeValue
-                (JDP.decode toDecoder
-                    |> JDP.required "exchange" JD.string
-                    |> JDP.required "label" JD.string
-                    |> JDP.required "price" JD.float
-                    |> JDP.required "quantity" JD.float
-                    |> JDP.required "type" JD.string
-                    |> JDP.required "time" JD.string
-                    |> JDP.required "tradeid" JD.string
-                    |> JDP.resolve
-                )
-                val
-    in
-        case transaction of
-            Ok t ->
-                TransactionReceived t
-
-            Err failed ->
-                CoinigyFailReceived
-                    (Debug.log "transaction receive fail" failed)
-
-
-handleOrder : Model -> ( String, JD.Value ) -> Msg
-handleOrder model ( marketId, val ) =
-    let
-        toDecoder price quantity tradeTypeTxt time =
-            JD.succeed
-                (Order
-                    (parseTradeType tradeTypeTxt)
-                    price
-                    quantity
-                    time
-                    marketId
-                )
-
-        orders =
-            JD.decodeValue
-                (JD.list
-                    (JD.oneOf
-                        [ (JDP.decode toDecoder
-                            |> JDP.required "price" JD.float
-                            |> JDP.required "quantity" JD.float
-                            |> JDP.required "ordertype" JD.string
-                            |> JDP.optional "timestamp" JD.string ""
-                            |> JDP.resolve
-                          )
-                        , JD.null (Order Buy 0.0 0.0 "" "")
-                        ]
-                    )
-                )
-                val
-    in
-        case orders of
-            Ok o ->
-                OrdersReceived o
-
-            Err failed ->
-                CoinigyFailReceived
-                    (Debug.log "order receive fail" failed)
+-- handleTrade : Model -> JD.Value -> Msg
+-- handleTrade model val =
+--     let
+--         toDecoder exchange market price quantity tradeTypeTxt time id =
+--             case (getMarketId model exchange market) of
+--                 Just marketId ->
+--                     JD.succeed
+--                         (Transaction id
+--                             (parseTradeType tradeTypeTxt)
+--                             price
+--                             quantity
+--                             time
+--                             marketId
+--                         )
+--
+--                 Nothing ->
+--                     JD.fail
+--                         ("Trade - Invalid exchange Id for "
+--                             ++ exchange
+--                             ++ "-"
+--                             ++ market
+--                         )
+--
+--         transaction =
+--             JD.decodeValue
+--                 (JDP.decode toDecoder
+--                     |> JDP.required "exchange" JD.string
+--                     |> JDP.required "label" JD.string
+--                     |> JDP.required "price" JD.float
+--                     |> JDP.required "quantity" JD.float
+--                     |> JDP.required "type" JD.string
+--                     |> JDP.required "time" JD.string
+--                     |> JDP.required "tradeid" JD.string
+--                     |> JDP.resolve
+--                 )
+--                 val
+--     in
+--         case transaction of
+--             Ok t ->
+--                 TransactionReceived t
+--
+--             Err failed ->
+--                 CoinigyFailReceived
+--                     (Debug.log "transaction receive fail" failed)
+-- handleOrder : Model -> ( String, JD.Value ) -> Msg
+-- handleOrder model ( marketId, val ) =
+--     let
+--         toDecoder price quantity tradeTypeTxt time =
+--             JD.succeed
+--                 (Order
+--                     (parseTradeType tradeTypeTxt)
+--                     price
+--                     quantity
+--                     time
+--                     marketId
+--                 )
+--
+--         orders =
+--             JD.decodeValue
+--                 (JD.list
+--                     (JD.oneOf
+--                         [ (JDP.decode toDecoder
+--                             |> JDP.required "price" JD.float
+--                             |> JDP.required "quantity" JD.float
+--                             |> JDP.required "ordertype" JD.string
+--                             |> JDP.optional "timestamp" JD.string ""
+--                             |> JDP.resolve
+--                           )
+--                         , JD.null (Order Buy 0.0 0.0 "" "")
+--                         ]
+--                     )
+--                 )
+--                 val
+--     in
+--         case orders of
+--             Ok o ->
+--                 OrdersReceived o
+--
+--             Err failed ->
+--                 CoinigyFailReceived
+--                     (Debug.log "order receive fail" failed)
 
 
 subscriptions : Model -> Sub Msg
@@ -401,8 +406,9 @@ subscriptions model =
         Sub.batch
             [ Time.every (60 * Time.second) UpdateWatchMarket
             , coinigySocketConnection CoinigySocketConnection
-            , receiveTrade (handleTrade model)
-            , receiveOrder (handleOrder model)
+
+            -- , receiveTrade (handleTrade model)
+            -- , receiveOrder (handleOrder model)
             , newAlert AlertReceived
             ]
     else
@@ -415,7 +421,6 @@ subscriptions model =
 
 type Msg
     = AlertReceived (List Coin)
-    | TransactionReceived Transaction
     | CoinigyFailReceived String
     | OrdersReceived (List Order)
     | UpdateVolume String
@@ -461,13 +466,6 @@ update msg model =
 
         DeleteError ->
             ( { model | error = Nothing }, Cmd.none )
-
-        TransactionReceived t ->
-            let
-                newTransactionsBook =
-                    t :: model.transactionsBook
-            in
-                ( { model | transactionsBook = newTransactionsBook }, Cmd.none )
 
         OrdersReceived ordersList ->
             case List.head ordersList of
@@ -518,10 +516,35 @@ update msg model =
                 --
                 -- updatedCoins =
                 --     coins ++ oldCoins
+                oldCoins =
+                    coins
+                        |> List.filter
+                            (\i ->
+                                model.coins
+                                    |> List.filter (\o -> o.exchange == i.exchange && o.market == i.market)
+                                    |> List.length
+                                    |> (<) 0
+                            )
+
                 updatedCoins =
                     coins
+
+                countCoins =
+                    updatedCoins |> List.length
+
+                title =
+                    "CryptoTradingBuddy"
+
+                newTitle =
+                    if countCoins > 0 then
+                        "(" ++ (countCoins |> toString) ++ ") " ++ title
+                    else
+                        title
+
+                cmd =
+                    setTitle newTitle
             in
-                ( { model | coins = updatedCoins }, Cmd.none )
+                ( { model | coins = updatedCoins }, cmd )
 
         UpdatePeriod period ->
             let
@@ -1532,7 +1555,6 @@ topMenu model =
                 in
                     [ p [ class "navbar-item" ]
                         [ loadingIcon model
-                        , text ("Hello!")
 
                         -- , text ("Hello, " ++ model.user.name)
                         ]
@@ -1587,18 +1609,6 @@ mainContent model =
                     [ ul []
                         [ li
                             [ class
-                                (if model.content == MarketWatch then
-                                    "is-active"
-                                 else
-                                    ""
-                                )
-                            ]
-                            [ a [ onClick (SetContent MarketWatch) ]
-                                [ text "My Markets"
-                                ]
-                            ]
-                        , li
-                            [ class
                                 (if model.content == DaytradeScanner then
                                     "is-active"
                                  else
@@ -1606,7 +1616,8 @@ mainContent model =
                                 )
                             ]
                             [ a [ onClick (SetContent DaytradeScanner) ]
-                                [ text
+                                [ icon "bullhorn" False False
+                                , text
                                     ("Daytrade Scanner ("
                                         ++ (toString (List.length model.coins))
                                         ++ ")"
@@ -1622,7 +1633,9 @@ mainContent model =
                                 )
                             ]
                             [ a [ onClick (SetContent BaseCracker) ]
-                                [ text "Base Cracker" ]
+                                [ icon "line-chart" False False
+                                , text "Base Cracker"
+                                ]
                             ]
                         , li
                             [ class
@@ -1633,7 +1646,9 @@ mainContent model =
                                 )
                             ]
                             [ a [ onClick (SetContent ActiveTrades) ]
-                                [ text "Active Trades" ]
+                                [ icon "exchange" False False
+                                , text "Active Trades"
+                                ]
                             ]
                         , li
                             [ class
@@ -1644,7 +1659,22 @@ mainContent model =
                                 )
                             ]
                             [ a [ onClick (SetContent MyReports) ]
-                                [ text "My Reports" ]
+                                [ icon "book" False False
+                                , text "My Reports"
+                                ]
+                            ]
+                        , li
+                            [ class
+                                (if model.content == MarketWatch then
+                                    "is-active"
+                                 else
+                                    ""
+                                )
+                            ]
+                            [ a [ onClick (SetContent MarketWatch) ]
+                                [ icon "star" False False
+                                , text "Favorites"
+                                ]
                             ]
                         ]
                     ]

@@ -55,6 +55,14 @@ defmodule CryptoScanner.CoinigyClient do
     {:ok, pid}
   end
 
+  def reply_emit(msg, data \\ nil, state) do
+    frame = Poison.encode!(%{"event" => msg, "cid" => System.os_time, "data" => data})
+
+    Logger.info("Coinigy Replying Emit \n #{inspect(frame)}")
+
+    {:reply, {:text, frame}, state}
+  end
+
   def handle_cast(msg, state) do
     Logger.info("Unrecognized Coinigy Cast received: #{inspect(msg)}")
     {:ok, state}
@@ -62,8 +70,10 @@ defmodule CryptoScanner.CoinigyClient do
 
   def handle_frame({:text, "#" <> pingNum}, state) do
     Logger.info("Coinigy Ping ##{pingNum} Received")
-    CoinigyServer.pong_ws_client(:coinigy, pingNum)
-    {:ok, state}
+    # CoinigyServer.pong_ws_client(:coinigy, pingNum)
+    pong = String.to_integer(pingNum) + 1
+    Logger.info("Ping Reply to Coinigy SocketCluster ##{pong}")
+    {:reply, {:text, "##{pong}"}, state}
   end
 
   def handle_frame({:text, msg}, state) do
@@ -85,7 +95,7 @@ defmodule CryptoScanner.CoinigyClient do
 
         # channels
         if String.length(hd(data)["channel"]) > 0  do
-            CoinigyServer.set_ws_channels(:coinigy, data)
+            CoinigyServer.set_ws_channels(data)
         end
 
       {:ok, _} ->
@@ -99,9 +109,9 @@ defmodule CryptoScanner.CoinigyClient do
   def handle_publish(res) do
 
     case res["channel"] do
-      "TRADE-" <> trade_channel ->
+      "TRADE-" <> _trade_channel ->
         trade = res["data"]
-        CoinigyServer.tick_price(:coinigy, %{
+        CoinigyServer.tick_price(%{
             "exchange" => trade["exchange"],
             "label" => trade["label"],
             "price" => trade["price"],
@@ -141,7 +151,7 @@ defmodule CryptoScanner.CoinigyClient do
               end
             end)
 
-        CoinigyServer.tick_orders(:coinigy, %{
+        CoinigyServer.tick_orders(%{
             "exchange" => order["exchange"] || alt_exchange,
             "label" => order["label"] || (alt_base <> "/" <> alt_quote),
             "bid_price" => bid_price,
@@ -161,5 +171,6 @@ defmodule CryptoScanner.CoinigyClient do
     Logger.info("Coinigy Ws Terminating: \n#{inspect reason}\n\n#{inspect state}\n")
     exit(:normal)
   end
+
 
 end

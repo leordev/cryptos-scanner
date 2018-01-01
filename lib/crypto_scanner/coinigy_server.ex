@@ -45,19 +45,32 @@ defmodule CryptoScanner.CoinigyServer do
     {:noreply, state}
   end
 
-  def handle_info(:ws_ticker, state) do
-    CryptoScannerWeb.Endpoint.broadcast("scanner:alerts", "tick_alert", %{"coins" => state.coins})
-
-    Process.send_after(self(), :ws_ticker, 10_000)
+  def handle_info(:ws_default_subs, state) do
+    CoinigyClient.setup_default_channels()
     {:noreply, state}
   end
 
-  def subscribe_to_channels(pid, exch, base) do
-    GenServer.call(pid, {:subscribe_to_channels, exch, base})
+  def handle_info(:ws_ticker, state) do
+    CryptoScannerWeb.Endpoint.broadcast("scanner:alerts", "tick_alert", %{"coins" => state.coins})
+
+    Process.send_after(self(), :ws_ticker, 6_000)
+    {:noreply, state}
+  end
+
+  def subscribe_to_channels(exch, base) do
+    GenServer.call(:coinigy, {:subscribe_to_channels, exch, base})
   end
 
   def get_coins(pid) do
     GenServer.call(pid, :get_coins)
+  end
+
+  def get_subscriptions() do
+    GenServer.call(:coinigy, :get_ws_subscriptions)
+  end
+
+  def get_available_channels() do
+    GenServer.call(:coinigy, :get_available_channels)
   end
 
   # def get_hot(period, percentage) do
@@ -72,21 +85,66 @@ defmodule CryptoScanner.CoinigyServer do
     GenServer.cast(pid, {:set_auth_ws_client, token})
   end
 
-  def set_ws_channels(pid, channels) do
-    GenServer.cast(pid, {:set_ws_channels, channels})
+  def set_ws_channels(channels) do
+    GenServer.call(:coinigy, {:set_ws_channels, channels})
+    setup_default_subs()
   end
 
-  def tick_price(pid, data) do
-    GenServer.cast(pid, {:tick_price, data})
+  def setup_default_subs() do
+    # TODO: create an option in UI to set this up
+    spawn fn ->
+      GenServer.call(:coinigy, {:subscribe_to_channels, "PLNX", "USD"})
+      GenServer.call(:coinigy, {:subscribe_to_channels, "HITB", "USD"})
+      GenServer.call(:coinigy, {:subscribe_to_channels, "HITB", "ETH"})
+      GenServer.call(:coinigy, {:subscribe_to_channels, "LIQU", "BTC"})
+      GenServer.call(:coinigy, {:subscribe_to_channels, "BINA", "BTC"})
+    end
   end
 
-  def tick_orders(pid, data) do
-    GenServer.cast(pid, {:tick_orders, data})
+  def tick_price(data) do
+    GenServer.cast(:coinigy, {:tick_price, data})
+  end
+
+  def tick_orders(data) do
+    GenServer.cast(:coinigy, {:tick_orders, data})
   end
 
   def handle_call(:get_coins, _from, state) do
     {:reply, {:ok, state.coins}, state}
   end
+
+  def handle_call(:get_ws_subscriptions, _from, state) do
+    {:reply, {:ok, state.ws_subscriptions}, state}
+  end
+
+  def handle_call(:get_available_channels, _from, state) do
+    {:reply, {:ok, state.ws_channels}, state}
+  end
+
+  def handle_call({:set_ws_channels, channels}, _from, state) do
+    Logger.info("setting ws channels")
+    {:reply, {:ok, channels}, %{state | ws_channels: channels}}
+  end
+
+  def handle_call({:subscribe_to_channels, exch, base}, _from, state) do
+    channels = channels_for_exchange_base(state.ws_channels, exch, base)
+
+    subscribed_channels = for channel <- channels do
+      CoinigyClient.subscribe_channel(state.ws_client, channel)
+      channel
+    end
+
+    {:reply, :ok, %{state | ws_subscriptions: [ subscribed_channels | state.ws_subscriptions ] } }
+  end
+
+  def channels_for_exchange_base(channels, exch, base) do
+    channels
+    |> Enum.filter(fn i ->
+      String.contains?(i["channel"], exch) &&
+      String.contains?(i["channel"], base)
+    end)
+  end
+
 
   # def handle_call({:get_hot, period, value}, _from, state) do
   #   coins =
@@ -120,11 +178,6 @@ defmodule CryptoScanner.CoinigyServer do
   def handle_cast({:pong_ws_client, ping}, state) do
     CoinigyClient.pong(state.ws_client, ping)
     {:noreply, state}
-  end
-
-  def handle_cast({:set_ws_channels, channels}, state) do
-    Logger.info("setting ws channels")
-    {:noreply, %{state | ws_channels: channels}}
   end
 
   def handle_cast({:set_auth_ws_client, token}, state) do
@@ -240,20 +293,6 @@ defmodule CryptoScanner.CoinigyServer do
 
   defp compare_coin(a, b) do
     a["exchange"] == b["exchange"] && a["label"] == b["label"]
-  end
-
-  # CryptoScanner.CoinigyServer.subscribe_to_channels(:coinigy, "PLNX", "NXT")
-  def handle_call({:subscribe_to_channels, exch, base}, _from, state) do
-    channels =
-      state.ws_channels
-      |> Enum.filter(fn i -> String.contains?(i["channel"], exch) && String.contains?(i["channel"], base) end)
-
-    subscribed_channels = for channel <- channels do
-      CoinigyClient.subscribe_channel(state.ws_client, channel)
-      channel
-    end
-
-    {:reply, :ok, %{state | ws_subscriptions: [ subscribed_channels | state.ws_subscriptions ] } }
   end
 
   def calc_prices_percentages(coin) do

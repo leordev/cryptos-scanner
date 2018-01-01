@@ -52,9 +52,13 @@ defmodule CryptoScannerWeb.CoinigyController do
     json conn, response
   end
 
-  def hot(conn, %{"period" => period, "value" => value}) do
-    num = String.to_integer(value)
-    {:ok, data} = ExchangeServer.get_hot(:binance, period, num)
-    json conn, data
+  def get_subscriptions(conn, _params) do
+    {:ok, subscriptions} = CoinigyServer.get_subscriptions()
+    json conn, subscriptions
+  end
+
+  def get_available_channels(conn, _params) do
+    {:ok, subscriptions} = CoinigyServer.get_available_channels()
+    json conn, subscriptions
   end
 end

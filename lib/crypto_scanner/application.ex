@@ -21,15 +21,6 @@ defmodule CryptoScanner.Application do
     opts = [strategy: :one_for_one, name: CryptoScanner.Supervisor]
     response = Supervisor.start_link(children, opts)
 
-
-    # TODO: create an option in UI to set this up
-    Process.sleep(5000)
-    CryptoScanner.CoinigyServer.subscribe_to_channels(:coinigy, "PLNX", "USD")
-    CryptoScanner.CoinigyServer.subscribe_to_channels(:coinigy, "HITB", "USD")
-    CryptoScanner.CoinigyServer.subscribe_to_channels(:coinigy, "HITB", "ETH")
-    CryptoScanner.CoinigyServer.subscribe_to_channels(:coinigy, "LIQU", "BTC")
-    CryptoScanner.CoinigyServer.subscribe_to_channels(:coinigy, "BINA", "BTC")
-
     response
   end
 

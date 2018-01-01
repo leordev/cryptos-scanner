@@ -118,6 +118,12 @@ app.ports.deleteUser.subscribe(function () {
   localStorage.removeItem(STORAGE_KEY);
 });
 
+app.ports.setTitle.subscribe(function (title) {
+  if (document.title != title) {
+    document.title = title;
+  }
+});
+
 // app.ports.setFilter.subscribe(filter => {
 //   console.log("Setting filter >>>>> ", filter)
 //   channel.push("set_filter", filter)
@@ -16507,6 +16513,16 @@ var _user$project$Main$startSockets = _elm_lang$core$Native_Platform.outgoingPor
 				})
 		};
 	});
+var _user$project$Main$setTitle = _elm_lang$core$Native_Platform.outgoingPort(
+	'setTitle',
+	function (v) {
+		return v;
+	});
+var _user$project$Main$notifySound = _elm_lang$core$Native_Platform.outgoingPort(
+	'notifySound',
+	function (v) {
+		return v;
+	});
 var _user$project$Main$newAlert = _elm_lang$core$Native_Platform.incomingPort(
 	'newAlert',
 	_elm_lang$core$Json_Decode$list(
@@ -17272,15 +17288,6 @@ var _user$project$Main$update = F2(
 						{error: _elm_lang$core$Maybe$Nothing}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			case 'TransactionReceived':
-				var newTransactionsBook = {ctor: '::', _0: _p21._0, _1: model.transactionsBook};
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{transactionsBook: newTransactionsBook}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
 			case 'OrdersReceived':
 				var _p23 = _p21._0;
 				var _p22 = _elm_lang$core$List$head(_p23);
@@ -17345,13 +17352,42 @@ var _user$project$Main$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'AlertReceived':
-				var updatedCoins = _p21._0;
+				var _p24 = _p21._0;
+				var title = 'CryptoTradingBuddy';
+				var updatedCoins = _p24;
+				var countCoins = _elm_lang$core$List$length(updatedCoins);
+				var newTitle = (_elm_lang$core$Native_Utils.cmp(countCoins, 0) > 0) ? A2(
+					_elm_lang$core$Basics_ops['++'],
+					'(',
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						_elm_lang$core$Basics$toString(countCoins),
+						A2(_elm_lang$core$Basics_ops['++'], ') ', title))) : title;
+				var cmd = _user$project$Main$setTitle(newTitle);
+				var oldCoins = A2(
+					_elm_lang$core$List$filter,
+					function (i) {
+						return A2(
+							F2(
+								function (x, y) {
+									return _elm_lang$core$Native_Utils.cmp(x, y) < 0;
+								}),
+							0,
+							_elm_lang$core$List$length(
+								A2(
+									_elm_lang$core$List$filter,
+									function (o) {
+										return _elm_lang$core$Native_Utils.eq(o.exchange, i.exchange) && _elm_lang$core$Native_Utils.eq(o.market, i.market);
+									},
+									model.coins)));
+					},
+					_p24);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{coins: updatedCoins}),
-					_1: _elm_lang$core$Platform_Cmd$none
+					_1: cmd
 				};
 			case 'UpdatePeriod':
 				var filter = model.filter;
@@ -17495,7 +17531,7 @@ var _user$project$Main$update = F2(
 				}
 			case 'WatchListResponse':
 				if (_p21._0.ctor === 'Ok') {
-					var _p25 = _p21._0._0;
+					var _p26 = _p21._0._0;
 					var newMarkets = A2(
 						_elm_lang$core$List$filter,
 						function (r) {
@@ -17509,7 +17545,7 @@ var _user$project$Main$update = F2(
 										model.watchMarkets)),
 								0);
 						},
-						_p25);
+						_p26);
 					var oldMarkets = A2(
 						_elm_lang$core$List$map,
 						function (m) {
@@ -17519,11 +17555,11 @@ var _user$project$Main$update = F2(
 									function (r) {
 										return _elm_lang$core$Native_Utils.eq(r.marketId, m.marketId);
 									},
-									_p25));
-							var _p24 = newMarket;
-							if (_p24.ctor === 'Just') {
+									_p26));
+							var _p25 = newMarket;
+							if (_p25.ctor === 'Just') {
 								return _elm_lang$core$Native_Utils.update(
-									_p24._0,
+									_p25._0,
 									{askPrice: m.askPrice, bidPrice: m.bidPrice});
 							} else {
 								return m;
@@ -17535,9 +17571,9 @@ var _user$project$Main$update = F2(
 						A2(_elm_lang$core$Basics_ops['++'], newMarkets, oldMarkets),
 						model.history);
 					var cmd = (!model.coinigySocketsConnected) ? _user$project$Main$startSockets(
-						{user: model.user, exchanges: _p25}) : _elm_lang$core$Platform_Cmd$none;
+						{user: model.user, exchanges: _p26}) : _elm_lang$core$Platform_Cmd$none;
 					var setupStep = (_elm_lang$core$Native_Utils.cmp(
-						_elm_lang$core$List$length(_p25),
+						_elm_lang$core$List$length(_p26),
 						0) > 0) ? _user$project$Main$None : _user$project$Main$ExchangesSetup;
 					return {
 						ctor: '_Tuple2',
@@ -17655,9 +17691,9 @@ var _user$project$Main$ToggleSetup = function (a) {
 };
 var _user$project$Main$setupModal = function (model) {
 	var userData = model.user;
-	var _p26 = function () {
-		var _p27 = model.setupStep;
-		switch (_p27.ctor) {
+	var _p27 = function () {
+		var _p28 = model.setupStep;
+		switch (_p28.ctor) {
 			case 'UserSetup':
 				return {
 					ctor: '_Tuple3',
@@ -17740,9 +17776,9 @@ var _user$project$Main$setupModal = function (model) {
 				};
 		}
 	}();
-	var formContent = _p26._0;
-	var submitButton = _p26._1;
-	var cancelButton = _p26._2;
+	var formContent = _p27._0;
+	var submitButton = _p27._1;
+	var cancelButton = _p27._2;
 	return A6(
 		_user$project$Main$modalCard,
 		model,
@@ -17827,11 +17863,7 @@ var _user$project$Main$topMenu = function (model) {
 					{
 						ctor: '::',
 						_0: _user$project$Main$loadingIcon(model),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$html$Html$text('Hello!'),
-							_1: {ctor: '[]'}
-						}
+						_1: {ctor: '[]'}
 					}),
 				_1: {
 					ctor: '::',
@@ -18084,8 +18116,8 @@ var _user$project$Main$mainContent = function (model) {
 			});
 	} else {
 		var content = function () {
-			var _p28 = model.content;
-			switch (_p28.ctor) {
+			var _p29 = model.content;
+			switch (_p29.ctor) {
 				case 'MarketWatch':
 					return _user$project$Main$watchListContent(model);
 				case 'DaytradeScanner':
@@ -18153,7 +18185,7 @@ var _user$project$Main$mainContent = function (model) {
 							{
 								ctor: '::',
 								_0: _elm_lang$html$Html_Attributes$class(
-									_elm_lang$core$Native_Utils.eq(model.content, _user$project$Main$MarketWatch) ? 'is-active' : ''),
+									_elm_lang$core$Native_Utils.eq(model.content, _user$project$Main$DaytradeScanner) ? 'is-active' : ''),
 								_1: {ctor: '[]'}
 							},
 							{
@@ -18163,37 +18195,13 @@ var _user$project$Main$mainContent = function (model) {
 									{
 										ctor: '::',
 										_0: _elm_lang$html$Html_Events$onClick(
-											_user$project$Main$SetContent(_user$project$Main$MarketWatch)),
+											_user$project$Main$SetContent(_user$project$Main$DaytradeScanner)),
 										_1: {ctor: '[]'}
 									},
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html$text('My Markets'),
-										_1: {ctor: '[]'}
-									}),
-								_1: {ctor: '[]'}
-							}),
-						_1: {
-							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$li,
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$class(
-										_elm_lang$core$Native_Utils.eq(model.content, _user$project$Main$DaytradeScanner) ? 'is-active' : ''),
-									_1: {ctor: '[]'}
-								},
-								{
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$a,
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html_Events$onClick(
-												_user$project$Main$SetContent(_user$project$Main$DaytradeScanner)),
-											_1: {ctor: '[]'}
-										},
-										{
+										_0: A3(_user$project$Main$icon, 'bullhorn', false, false),
+										_1: {
 											ctor: '::',
 											_0: _elm_lang$html$Html$text(
 												A2(
@@ -18205,6 +18213,38 @@ var _user$project$Main$mainContent = function (model) {
 															_elm_lang$core$List$length(model.coins)),
 														')'))),
 											_1: {ctor: '[]'}
+										}
+									}),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$li,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class(
+										_elm_lang$core$Native_Utils.eq(model.content, _user$project$Main$BaseCracker) ? 'is-active' : ''),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$a,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Events$onClick(
+												_user$project$Main$SetContent(_user$project$Main$BaseCracker)),
+											_1: {ctor: '[]'}
+										},
+										{
+											ctor: '::',
+											_0: A3(_user$project$Main$icon, 'line-chart', false, false),
+											_1: {
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('Base Cracker'),
+												_1: {ctor: '[]'}
+											}
 										}),
 									_1: {ctor: '[]'}
 								}),
@@ -18215,7 +18255,7 @@ var _user$project$Main$mainContent = function (model) {
 									{
 										ctor: '::',
 										_0: _elm_lang$html$Html_Attributes$class(
-											_elm_lang$core$Native_Utils.eq(model.content, _user$project$Main$BaseCracker) ? 'is-active' : ''),
+											_elm_lang$core$Native_Utils.eq(model.content, _user$project$Main$ActiveTrades) ? 'is-active' : ''),
 										_1: {ctor: '[]'}
 									},
 									{
@@ -18225,13 +18265,17 @@ var _user$project$Main$mainContent = function (model) {
 											{
 												ctor: '::',
 												_0: _elm_lang$html$Html_Events$onClick(
-													_user$project$Main$SetContent(_user$project$Main$BaseCracker)),
+													_user$project$Main$SetContent(_user$project$Main$ActiveTrades)),
 												_1: {ctor: '[]'}
 											},
 											{
 												ctor: '::',
-												_0: _elm_lang$html$Html$text('Base Cracker'),
-												_1: {ctor: '[]'}
+												_0: A3(_user$project$Main$icon, 'exchange', false, false),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$html$Html$text('Active Trades'),
+													_1: {ctor: '[]'}
+												}
 											}),
 										_1: {ctor: '[]'}
 									}),
@@ -18242,7 +18286,7 @@ var _user$project$Main$mainContent = function (model) {
 										{
 											ctor: '::',
 											_0: _elm_lang$html$Html_Attributes$class(
-												_elm_lang$core$Native_Utils.eq(model.content, _user$project$Main$ActiveTrades) ? 'is-active' : ''),
+												_elm_lang$core$Native_Utils.eq(model.content, _user$project$Main$MyReports) ? 'is-active' : ''),
 											_1: {ctor: '[]'}
 										},
 										{
@@ -18252,13 +18296,17 @@ var _user$project$Main$mainContent = function (model) {
 												{
 													ctor: '::',
 													_0: _elm_lang$html$Html_Events$onClick(
-														_user$project$Main$SetContent(_user$project$Main$ActiveTrades)),
+														_user$project$Main$SetContent(_user$project$Main$MyReports)),
 													_1: {ctor: '[]'}
 												},
 												{
 													ctor: '::',
-													_0: _elm_lang$html$Html$text('Active Trades'),
-													_1: {ctor: '[]'}
+													_0: A3(_user$project$Main$icon, 'book', false, false),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$html$Html$text('My Reports'),
+														_1: {ctor: '[]'}
+													}
 												}),
 											_1: {ctor: '[]'}
 										}),
@@ -18269,7 +18317,7 @@ var _user$project$Main$mainContent = function (model) {
 											{
 												ctor: '::',
 												_0: _elm_lang$html$Html_Attributes$class(
-													_elm_lang$core$Native_Utils.eq(model.content, _user$project$Main$MyReports) ? 'is-active' : ''),
+													_elm_lang$core$Native_Utils.eq(model.content, _user$project$Main$MarketWatch) ? 'is-active' : ''),
 												_1: {ctor: '[]'}
 											},
 											{
@@ -18279,13 +18327,17 @@ var _user$project$Main$mainContent = function (model) {
 													{
 														ctor: '::',
 														_0: _elm_lang$html$Html_Events$onClick(
-															_user$project$Main$SetContent(_user$project$Main$MyReports)),
+															_user$project$Main$SetContent(_user$project$Main$MarketWatch)),
 														_1: {ctor: '[]'}
 													},
 													{
 														ctor: '::',
-														_0: _elm_lang$html$Html$text('My Reports'),
-														_1: {ctor: '[]'}
+														_0: A3(_user$project$Main$icon, 'star', false, false),
+														_1: {
+															ctor: '::',
+															_0: _elm_lang$html$Html$text('Favorites'),
+															_1: {ctor: '[]'}
+														}
 													}),
 												_1: {ctor: '[]'}
 											}),
@@ -18518,131 +18570,6 @@ var _user$project$Main$OrdersReceived = function (a) {
 var _user$project$Main$CoinigyFailReceived = function (a) {
 	return {ctor: 'CoinigyFailReceived', _0: a};
 };
-var _user$project$Main$handleOrder = F2(
-	function (model, _p29) {
-		var _p30 = _p29;
-		var toDecoder = F4(
-			function (price, quantity, tradeTypeTxt, time) {
-				return _elm_lang$core$Json_Decode$succeed(
-					A5(
-						_user$project$Main$Order,
-						_user$project$Main$parseTradeType(tradeTypeTxt),
-						price,
-						quantity,
-						time,
-						_p30._0));
-			});
-		var orders = A2(
-			_elm_lang$core$Json_Decode$decodeValue,
-			_elm_lang$core$Json_Decode$list(
-				_elm_lang$core$Json_Decode$oneOf(
-					{
-						ctor: '::',
-						_0: _NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$resolve(
-							A4(
-								_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$optional,
-								'timestamp',
-								_elm_lang$core$Json_Decode$string,
-								'',
-								A3(
-									_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-									'ordertype',
-									_elm_lang$core$Json_Decode$string,
-									A3(
-										_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-										'quantity',
-										_elm_lang$core$Json_Decode$float,
-										A3(
-											_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-											'price',
-											_elm_lang$core$Json_Decode$float,
-											_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(toDecoder)))))),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$core$Json_Decode$null(
-								A5(_user$project$Main$Order, _user$project$Main$Buy, 0.0, 0.0, '', '')),
-							_1: {ctor: '[]'}
-						}
-					})),
-			_p30._1);
-		var _p31 = orders;
-		if (_p31.ctor === 'Ok') {
-			return _user$project$Main$OrdersReceived(_p31._0);
-		} else {
-			return _user$project$Main$CoinigyFailReceived(
-				A2(_elm_lang$core$Debug$log, 'order receive fail', _p31._0));
-		}
-	});
-var _user$project$Main$TransactionReceived = function (a) {
-	return {ctor: 'TransactionReceived', _0: a};
-};
-var _user$project$Main$handleTrade = F2(
-	function (model, val) {
-		var toDecoder = F7(
-			function (exchange, market, price, quantity, tradeTypeTxt, time, id) {
-				var _p32 = A3(_user$project$Main$getMarketId, model, exchange, market);
-				if (_p32.ctor === 'Just') {
-					return _elm_lang$core$Json_Decode$succeed(
-						A6(
-							_user$project$Main$Transaction,
-							id,
-							_user$project$Main$parseTradeType(tradeTypeTxt),
-							price,
-							quantity,
-							time,
-							_p32._0));
-				} else {
-					return _elm_lang$core$Json_Decode$fail(
-						A2(
-							_elm_lang$core$Basics_ops['++'],
-							'Trade - Invalid exchange Id for ',
-							A2(
-								_elm_lang$core$Basics_ops['++'],
-								exchange,
-								A2(_elm_lang$core$Basics_ops['++'], '-', market))));
-				}
-			});
-		var transaction = A2(
-			_elm_lang$core$Json_Decode$decodeValue,
-			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$resolve(
-				A3(
-					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-					'tradeid',
-					_elm_lang$core$Json_Decode$string,
-					A3(
-						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-						'time',
-						_elm_lang$core$Json_Decode$string,
-						A3(
-							_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-							'type',
-							_elm_lang$core$Json_Decode$string,
-							A3(
-								_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-								'quantity',
-								_elm_lang$core$Json_Decode$float,
-								A3(
-									_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-									'price',
-									_elm_lang$core$Json_Decode$float,
-									A3(
-										_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-										'label',
-										_elm_lang$core$Json_Decode$string,
-										A3(
-											_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-											'exchange',
-											_elm_lang$core$Json_Decode$string,
-											_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(toDecoder))))))))),
-			val);
-		var _p33 = transaction;
-		if (_p33.ctor === 'Ok') {
-			return _user$project$Main$TransactionReceived(_p33._0);
-		} else {
-			return _user$project$Main$CoinigyFailReceived(
-				A2(_elm_lang$core$Debug$log, 'transaction receive fail', _p33._0));
-		}
-	});
 var _user$project$Main$AlertReceived = function (a) {
 	return {ctor: 'AlertReceived', _0: a};
 };
@@ -18656,18 +18583,8 @@ var _user$project$Main$subscriptions = function (model) {
 				_0: _user$project$Main$coinigySocketConnection(_user$project$Main$CoinigySocketConnection),
 				_1: {
 					ctor: '::',
-					_0: _user$project$Main$receiveTrade(
-						_user$project$Main$handleTrade(model)),
-					_1: {
-						ctor: '::',
-						_0: _user$project$Main$receiveOrder(
-							_user$project$Main$handleOrder(model)),
-						_1: {
-							ctor: '::',
-							_0: _user$project$Main$newAlert(_user$project$Main$AlertReceived),
-							_1: {ctor: '[]'}
-						}
-					}
+					_0: _user$project$Main$newAlert(_user$project$Main$AlertReceived),
+					_1: {ctor: '[]'}
 				}
 			}
 		}) : _elm_lang$core$Platform_Sub$none;
@@ -18744,7 +18661,7 @@ var _user$project$Main$main = _elm_lang$html$Html$programWithFlags(
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
 if (typeof _user$project$Main$main !== 'undefined') {
-    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"unions":{"Dict.LeafColor":{"args":[],"tags":{"LBBlack":[],"LBlack":[]}},"Main.SetupStep":{"args":[],"tags":{"ExchangesSetup":[],"None":[],"UserSetup":[]}},"Main.TradeType":{"args":[],"tags":{"Sell":[],"Buy":[]}},"Dict.Dict":{"args":["k","v"],"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Main.Content":{"args":[],"tags":{"BaseCracker":[],"MarketWatch":[],"ActiveTrades":[],"MyReports":[],"DaytradeScanner":[]}},"Main.Msg":{"args":[],"tags":{"UpdateWatchMarket":["Time.Time"],"Logout":[],"UpdateCoinigyKey":["String"],"ToggleSetup":["Main.SetupStep"],"ResetFilter":[],"SetContent":["Main.Content"],"ShowFilter":[],"ExchangesResponse":["Result.Result Http.Error (List Main.Exchange)"],"UserKeysResponse":["Result.Result Http.Error Main.User"],"ToggleSound":[],"UpdatePercentage":["String"],"DeleteError":[],"UpdateCoinigyChannelKey":["String"],"CoinigyFailReceived":["String"],"UpdatePeriod":["String"],"CoinigySocketConnection":["Bool"],"UpdateUserSetup":[],"SetFilter":[],"OrdersReceived":["List Main.Order"],"WatchListResponse":["Result.Result Http.Error (List Main.Coin)"],"TransactionReceived":["Main.Transaction"],"UpdateCoinigySecret":["String"],"AlertReceived":["List Main.Coin"],"UpdateVolume":["String"]}},"Dict.NColor":{"args":[],"tags":{"BBlack":[],"Red":[],"NBlack":[],"Black":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String"],"NetworkError":[],"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}}},"aliases":{"Main.User":{"args":[],"type":"{ id : String , email : String , name : String , apiKey : String , apiSecret : String , apiChannelKey : String }"},"Http.Response":{"args":["body"],"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }"},"Main.Period":{"args":[],"type":"{ min : Float, max : Float, diff : Float, percentage : Float }"},"Main.Transaction":{"args":[],"type":"{ id : String , tradeType : Main.TradeType , price : Float , quantity : Float , time : String , marketId : String }"},"Main.Order":{"args":[],"type":"{ tradeType : Main.TradeType , price : Float , quantity : Float , time : String , marketId : String }"},"Main.Coin":{"args":[],"type":"{ exchange : String , marketId : String , base : String , quote : String , market : String , from : Float , to : Float , volume : Float , btcVolume : Float , bidPrice : Float , askPrice : Float , percentage : Float , time : String , period3m : Maybe.Maybe Main.Period , period5m : Maybe.Maybe Main.Period , period10m : Maybe.Maybe Main.Period , period15m : Maybe.Maybe Main.Period , period30m : Maybe.Maybe Main.Period }"},"Time.Time":{"args":[],"type":"Float"},"Main.Exchange":{"args":[],"type":"{ id : String, code : String, name : String }"}},"message":"Main.Msg"},"versions":{"elm":"0.18.0"}});
+    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"unions":{"Dict.LeafColor":{"args":[],"tags":{"LBBlack":[],"LBlack":[]}},"Main.SetupStep":{"args":[],"tags":{"ExchangesSetup":[],"None":[],"UserSetup":[]}},"Main.TradeType":{"args":[],"tags":{"Sell":[],"Buy":[]}},"Dict.Dict":{"args":["k","v"],"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Main.Content":{"args":[],"tags":{"BaseCracker":[],"MarketWatch":[],"ActiveTrades":[],"MyReports":[],"DaytradeScanner":[]}},"Main.Msg":{"args":[],"tags":{"UpdateWatchMarket":["Time.Time"],"Logout":[],"UpdateCoinigyKey":["String"],"ToggleSetup":["Main.SetupStep"],"ResetFilter":[],"SetContent":["Main.Content"],"ShowFilter":[],"ExchangesResponse":["Result.Result Http.Error (List Main.Exchange)"],"UserKeysResponse":["Result.Result Http.Error Main.User"],"ToggleSound":[],"UpdatePercentage":["String"],"DeleteError":[],"UpdateCoinigyChannelKey":["String"],"CoinigyFailReceived":["String"],"UpdatePeriod":["String"],"CoinigySocketConnection":["Bool"],"UpdateUserSetup":[],"SetFilter":[],"OrdersReceived":["List Main.Order"],"WatchListResponse":["Result.Result Http.Error (List Main.Coin)"],"UpdateCoinigySecret":["String"],"AlertReceived":["List Main.Coin"],"UpdateVolume":["String"]}},"Dict.NColor":{"args":[],"tags":{"BBlack":[],"Red":[],"NBlack":[],"Black":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String"],"NetworkError":[],"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}}},"aliases":{"Main.User":{"args":[],"type":"{ id : String , email : String , name : String , apiKey : String , apiSecret : String , apiChannelKey : String }"},"Http.Response":{"args":["body"],"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }"},"Main.Period":{"args":[],"type":"{ min : Float, max : Float, diff : Float, percentage : Float }"},"Main.Order":{"args":[],"type":"{ tradeType : Main.TradeType , price : Float , quantity : Float , time : String , marketId : String }"},"Main.Coin":{"args":[],"type":"{ exchange : String , marketId : String , base : String , quote : String , market : String , from : Float , to : Float , volume : Float , btcVolume : Float , bidPrice : Float , askPrice : Float , percentage : Float , time : String , period3m : Maybe.Maybe Main.Period , period5m : Maybe.Maybe Main.Period , period10m : Maybe.Maybe Main.Period , period15m : Maybe.Maybe Main.Period , period30m : Maybe.Maybe Main.Period }"},"Time.Time":{"args":[],"type":"Float"},"Main.Exchange":{"args":[],"type":"{ id : String, code : String, name : String }"}},"message":"Main.Msg"},"versions":{"elm":"0.18.0"}});
 }
 
 if (typeof define === "function" && define['amd'])
