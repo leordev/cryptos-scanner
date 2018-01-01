@@ -35,12 +35,20 @@ defmodule CryptoScanner.CoinigyServer do
 
     #schedule_coins()
     Process.send_after(self(), :ws_auth, 1_000)
+    Process.send_after(self(), :ws_ticker, 30_000)
 
     {:ok, state}
   end
 
   def handle_info(:ws_auth, state) do
     CoinigyClient.auth(state.ws_client, System.get_env("COINIGY_API_KEY"), System.get_env("COINIGY_API_SECRET"))
+    {:noreply, state}
+  end
+
+  def handle_info(:ws_ticker, state) do
+    CryptoScannerWeb.Endpoint.broadcast("scanner:alerts", "tick_alert", %{"coins" => state.coins})
+
+    Process.send_after(self(), :ws_ticker, 10_000)
     {:noreply, state}
   end
 
@@ -174,7 +182,7 @@ defmodule CryptoScanner.CoinigyServer do
         %{ state | coins: [new_coin | state.coins] }
       end
 
-    CryptoScannerWeb.Endpoint.broadcast("scanner:alerts", "tick_alert", %{"coins" => new_state.coins})
+    # CryptoScannerWeb.Endpoint.broadcast("scanner:alerts", "tick_alert", %{"coins" => new_state.coins})
 
     {:noreply, new_state}
   end

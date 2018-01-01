@@ -139,14 +139,16 @@ channel.join().receive("ok", function (resp) {
 channel.push("set_filter", { period: "5m", percentage: -4 });
 
 channel.on("tick_alert", function (payload) {
-  console.log("[" + Date() + "] Alert", payload.coins);
   var coins = payload.coins.map(function (c) {
     return Object.assign({}, c, {
+      marketId: c.exchange + "-" + c.symbol,
+      market: c.symbol,
       volume: Number.parseFloat(c.volume),
+      btcVolume: Number.parseFloat(c.volume),
       bidPrice: Number.parseFloat(c.bidPrice),
       askPrice: Number.parseFloat(c.askPrice),
       percentage: Number.parseFloat(c.percentage.toFixed(2)),
-      time: Date.now()
+      time: new Date().toString()
     });
   });
   app.ports.newAlert.send(coins);
@@ -15157,10 +15159,10 @@ var _user$project$Main$coinCard = function (coin) {
 	};
 	var titleColor = _p0._0;
 	var percentIcon = _p0._1;
-	var coinMarketCapUrl = A2(
+	var cryptoCompare = A2(
 		_elm_lang$core$Basics_ops['++'],
-		'https://coinmarketcap.com/currencies/',
-		A2(_elm_lang$core$Basics_ops['++'], coin.base, '/#markets'));
+		'https://www.cryptocompare.com/coins/',
+		A2(_elm_lang$core$Basics_ops['++'], coin.base, '/influence'));
 	var coinigyUrl = A2(
 		_elm_lang$core$Basics_ops['++'],
 		'https://www.coinigy.com/main/markets/',
@@ -15179,7 +15181,7 @@ var _user$project$Main$coinCard = function (coin) {
 		_elm_lang$core$Basics_ops['++'],
 		_elm_lang$core$Basics$toString(coin.percentage),
 		'% ');
-	var exchangeName = '@Binance';
+	var exchangeName = A2(_elm_lang$core$Basics_ops['++'], '@ ', coin.exchange);
 	var pairName = A2(
 		_elm_lang$core$Basics_ops['++'],
 		coin.base,
@@ -15622,7 +15624,7 @@ var _user$project$Main$coinCard = function (coin) {
 												_elm_lang$html$Html$a,
 												{
 													ctor: '::',
-													_0: _elm_lang$html$Html_Attributes$href(coinMarketCapUrl),
+													_0: _elm_lang$html$Html_Attributes$href(cryptoCompare),
 													_1: {
 														ctor: '::',
 														_0: _elm_lang$html$Html_Attributes$target('_blank'),
@@ -15635,7 +15637,7 @@ var _user$project$Main$coinCard = function (coin) {
 												},
 												{
 													ctor: '::',
-													_0: _elm_lang$html$Html$text('Coin Market Cap'),
+													_0: _elm_lang$html$Html$text('CryptoCompare'),
 													_1: {ctor: '[]'}
 												}),
 											_1: {ctor: '[]'}
@@ -17942,7 +17944,12 @@ var _user$project$Main$scannerContent = function (model) {
 			function (c) {
 				return _user$project$Main$coinCard(c);
 			},
-			model.coins)) : A2(
+			A2(
+				_elm_lang$core$List$sortBy,
+				function (_) {
+					return _.percentage;
+				},
+				model.coins))) : A2(
 		_elm_lang$html$Html$p,
 		{ctor: '[]'},
 		{
@@ -18188,7 +18195,15 @@ var _user$project$Main$mainContent = function (model) {
 										},
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html$text('Daytrade Scanner'),
+											_0: _elm_lang$html$Html$text(
+												A2(
+													_elm_lang$core$Basics_ops['++'],
+													'Daytrade Scanner (',
+													A2(
+														_elm_lang$core$Basics_ops['++'],
+														_elm_lang$core$Basics$toString(
+															_elm_lang$core$List$length(model.coins)),
+														')'))),
 											_1: {ctor: '[]'}
 										}),
 									_1: {ctor: '[]'}
@@ -18628,6 +18643,9 @@ var _user$project$Main$handleTrade = F2(
 				A2(_elm_lang$core$Debug$log, 'transaction receive fail', _p33._0));
 		}
 	});
+var _user$project$Main$AlertReceived = function (a) {
+	return {ctor: 'AlertReceived', _0: a};
+};
 var _user$project$Main$subscriptions = function (model) {
 	return (!_elm_lang$core$String$isEmpty(model.user.id)) ? _elm_lang$core$Platform_Sub$batch(
 		{
@@ -18644,7 +18662,11 @@ var _user$project$Main$subscriptions = function (model) {
 						ctor: '::',
 						_0: _user$project$Main$receiveOrder(
 							_user$project$Main$handleOrder(model)),
-						_1: {ctor: '[]'}
+						_1: {
+							ctor: '::',
+							_0: _user$project$Main$newAlert(_user$project$Main$AlertReceived),
+							_1: {ctor: '[]'}
+						}
 					}
 				}
 			}
@@ -18718,9 +18740,6 @@ var _user$project$Main$main = _elm_lang$html$Html$programWithFlags(
 							A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string));
 					},
 					A2(_elm_lang$core$Json_Decode$field, 'code', _elm_lang$core$Json_Decode$string))))));
-var _user$project$Main$AlertReceived = function (a) {
-	return {ctor: 'AlertReceived', _0: a};
-};
 
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};

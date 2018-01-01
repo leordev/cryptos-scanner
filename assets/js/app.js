@@ -57,14 +57,16 @@ channel.join()
 channel.push("set_filter", { period: "5m", percentage: -4})
 
 channel.on("tick_alert", payload => {
-  console.log(`[${Date()}] Alert`, payload.coins);
   const coins = payload.coins.map(c => {
     return Object.assign({}, c, {
+      marketId: c.exchange + "-" + c.symbol,
+      market: c.symbol,
       volume: Number.parseFloat(c.volume),
+      btcVolume: Number.parseFloat(c.volume),
       bidPrice: Number.parseFloat(c.bidPrice),
       askPrice: Number.parseFloat(c.askPrice),
       percentage: Number.parseFloat(c.percentage.toFixed(2)),
-      time: Date.now()
+      time: (new Date).toString()
     })
   })
   app.ports.newAlert.send(coins)

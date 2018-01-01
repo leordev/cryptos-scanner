@@ -9,6 +9,11 @@ defmodule CryptoScanner.Coin do
     :volume,
     :bidPrice,
     :askPrice,
-    :percentage
+    :percentage,
+    :period3m,
+    :period5m,
+    :period10m,
+    :period15m,
+    :period30m
   ]
 end

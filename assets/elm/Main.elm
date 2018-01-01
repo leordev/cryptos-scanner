@@ -403,6 +403,7 @@ subscriptions model =
             , coinigySocketConnection CoinigySocketConnection
             , receiveTrade (handleTrade model)
             , receiveOrder (handleOrder model)
+            , newAlert AlertReceived
             ]
     else
         Sub.none
@@ -1398,7 +1399,7 @@ coinCard coin =
             coin.base ++ "/" ++ coin.quote
 
         exchangeName =
-            "@Binance"
+            "@ " ++ coin.exchange
 
         percentage =
             toString coin.percentage ++ "% "
@@ -1414,10 +1415,8 @@ coinCard coin =
                 ++ "/"
                 ++ coin.quote
 
-        coinMarketCapUrl =
-            "https://coinmarketcap.com/currencies/"
-                ++ coin.base
-                ++ "/#markets"
+        cryptoCompare =
+            "https://www.cryptocompare.com/coins/" ++ coin.base ++ "/influence"
 
         ( titleColor, percentIcon ) =
             if coin.percentage < 0 then
@@ -1500,11 +1499,11 @@ coinCard coin =
                         ]
                         [ text "Coinigy" ]
                     , a
-                        [ href coinMarketCapUrl
+                        [ href cryptoCompare
                         , target "_blank"
                         , class "card-footer-item"
                         ]
-                        [ text "Coin Market Cap" ]
+                        [ text "CryptoCompare" ]
                     ]
                 ]
             ]
@@ -1607,7 +1606,12 @@ mainContent model =
                                 )
                             ]
                             [ a [ onClick (SetContent DaytradeScanner) ]
-                                [ text "Daytrade Scanner" ]
+                                [ text
+                                    ("Daytrade Scanner ("
+                                        ++ (toString (List.length model.coins))
+                                        ++ ")"
+                                    )
+                                ]
                             ]
                         , li
                             [ class
@@ -1762,9 +1766,10 @@ scannerContent model =
             if List.length model.coins > 0 then
                 div
                     [ class "columns is-multiline" ]
-                    (List.map
-                        (\c -> coinCard c)
-                        model.coins
+                    (model.coins
+                        |> List.sortBy .percentage
+                        |> List.map
+                            (\c -> coinCard c)
                     )
             else
                 p [] [ text "Go relax man! No scanner alerts... at least for now!" ]

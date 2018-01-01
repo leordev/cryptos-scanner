@@ -54,7 +54,12 @@ defmodule CryptoScannerWeb.ScannerChannel do
           askPrice: c["ask_price"],
           from: period["max"],
           to: period["min"],
-          percentage: period["percentage"]
+          percentage: period["percentage"],
+          period3m: c["period_3m"],
+          period5m: c["period_5m"],
+          period10m: c["period_10m"],
+          period15m: c["period_15m"],
+          period30m: c["period_30m"]
         }
       end)
   end
