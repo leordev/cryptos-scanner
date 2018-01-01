@@ -1,7 +1,8 @@
 defmodule CryptoScannerWeb.ScannerChannel do
   use Phoenix.Channel
 
-  alias CryptoScanner.ExchangeServer
+  # alias CryptoScanner.CoinigyServer
+  alias CryptoScanner.Coin
 
   intercept ["tick_alert"]
 
@@ -19,19 +20,43 @@ defmodule CryptoScannerWeb.ScannerChannel do
     {:noreply, socket}
   end
 
-  def handle_out("tick_alert", %{"exchange" => exchange}, socket) do
+  def handle_out("tick_alert", %{"coins" => coins}, socket) do
     %{
       "period" => period,
       "percentage" => percentage
     } = socket.assigns[:filter]
 
-    {:ok, coins} = ExchangeServer.get_hot(exchange, period, percentage)
-
-    coins = %{coins: coins}
-
-    push socket, "tick_alert", coins
+    if coins != [] do
+      push socket, "tick_alert", %{coins: calc_hot(coins, period, percentage)}
+    end
 
     {:noreply, socket}
+  end
+
+  def calc_hot(coins, period, value) do
+    coins
+      |> Enum.filter(fn c ->
+        percent = c["period_" <> period]["percentage"]
+        (value < 0 && percent <= value) || (value > 0 && percent >= value)
+      end)
+      |> Enum.map(fn c ->
+        period = c["period_" <> period]
+
+        [ base, quote ] = String.split(c["label"], "/")
+
+        %Coin{
+          exchange: c["exchange"],
+          symbol: c["label"],
+          base: base,
+          quote: quote,
+          volume: c["volume_btc"],
+          bidPrice: c["bid_price"],
+          askPrice: c["ask_price"],
+          from: period["max"],
+          to: period["min"],
+          percentage: period["percentage"]
+        }
+      end)
   end
 
 

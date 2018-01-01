@@ -119,9 +119,38 @@ app.ports.deleteUser.subscribe(function () {
 });
 
 // app.ports.setFilter.subscribe(filter => {
-//   console.log(">>>>> Setting filter ", filter)
-//   // channel.push("set_filter", filter)
+//   console.log("Setting filter >>>>> ", filter)
+//   channel.push("set_filter", filter)
 // })
+
+// app ports for elm and/or business logic
+var socket = new _phoenix.Socket("/socket");
+socket.connect();
+
+// Now that you are connected, you can join channels with a topic:
+var channel = socket.channel("scanner:alerts", {});
+
+channel.join().receive("ok", function (resp) {
+  console.log("Joined successfully");
+}).receive("error", function (resp) {
+  console.log("Unable to join", resp);
+});
+
+channel.push("set_filter", { period: "5m", percentage: -4 });
+
+channel.on("tick_alert", function (payload) {
+  console.log("[" + Date() + "] Alert", payload.coins);
+  var coins = payload.coins.map(function (c) {
+    return Object.assign({}, c, {
+      volume: Number.parseFloat(c.volume),
+      bidPrice: Number.parseFloat(c.bidPrice),
+      askPrice: Number.parseFloat(c.askPrice),
+      percentage: Number.parseFloat(c.percentage.toFixed(2)),
+      time: Date.now()
+    });
+  });
+  app.ports.newAlert.send(coins);
+});
 
 /***/ }),
 /* 2 */
@@ -16476,6 +16505,281 @@ var _user$project$Main$startSockets = _elm_lang$core$Native_Platform.outgoingPor
 				})
 		};
 	});
+var _user$project$Main$newAlert = _elm_lang$core$Native_Platform.incomingPort(
+	'newAlert',
+	_elm_lang$core$Json_Decode$list(
+		A2(
+			_elm_lang$core$Json_Decode$andThen,
+			function (exchange) {
+				return A2(
+					_elm_lang$core$Json_Decode$andThen,
+					function (marketId) {
+						return A2(
+							_elm_lang$core$Json_Decode$andThen,
+							function (base) {
+								return A2(
+									_elm_lang$core$Json_Decode$andThen,
+									function (quote) {
+										return A2(
+											_elm_lang$core$Json_Decode$andThen,
+											function (market) {
+												return A2(
+													_elm_lang$core$Json_Decode$andThen,
+													function (from) {
+														return A2(
+															_elm_lang$core$Json_Decode$andThen,
+															function (to) {
+																return A2(
+																	_elm_lang$core$Json_Decode$andThen,
+																	function (volume) {
+																		return A2(
+																			_elm_lang$core$Json_Decode$andThen,
+																			function (btcVolume) {
+																				return A2(
+																					_elm_lang$core$Json_Decode$andThen,
+																					function (bidPrice) {
+																						return A2(
+																							_elm_lang$core$Json_Decode$andThen,
+																							function (askPrice) {
+																								return A2(
+																									_elm_lang$core$Json_Decode$andThen,
+																									function (percentage) {
+																										return A2(
+																											_elm_lang$core$Json_Decode$andThen,
+																											function (time) {
+																												return A2(
+																													_elm_lang$core$Json_Decode$andThen,
+																													function (period3m) {
+																														return A2(
+																															_elm_lang$core$Json_Decode$andThen,
+																															function (period5m) {
+																																return A2(
+																																	_elm_lang$core$Json_Decode$andThen,
+																																	function (period10m) {
+																																		return A2(
+																																			_elm_lang$core$Json_Decode$andThen,
+																																			function (period15m) {
+																																				return A2(
+																																					_elm_lang$core$Json_Decode$andThen,
+																																					function (period30m) {
+																																						return _elm_lang$core$Json_Decode$succeed(
+																																							{exchange: exchange, marketId: marketId, base: base, quote: quote, market: market, from: from, to: to, volume: volume, btcVolume: btcVolume, bidPrice: bidPrice, askPrice: askPrice, percentage: percentage, time: time, period3m: period3m, period5m: period5m, period10m: period10m, period15m: period15m, period30m: period30m});
+																																					},
+																																					A2(
+																																						_elm_lang$core$Json_Decode$field,
+																																						'period30m',
+																																						_elm_lang$core$Json_Decode$oneOf(
+																																							{
+																																								ctor: '::',
+																																								_0: _elm_lang$core$Json_Decode$null(_elm_lang$core$Maybe$Nothing),
+																																								_1: {
+																																									ctor: '::',
+																																									_0: A2(
+																																										_elm_lang$core$Json_Decode$map,
+																																										_elm_lang$core$Maybe$Just,
+																																										A2(
+																																											_elm_lang$core$Json_Decode$andThen,
+																																											function (min) {
+																																												return A2(
+																																													_elm_lang$core$Json_Decode$andThen,
+																																													function (max) {
+																																														return A2(
+																																															_elm_lang$core$Json_Decode$andThen,
+																																															function (diff) {
+																																																return A2(
+																																																	_elm_lang$core$Json_Decode$andThen,
+																																																	function (percentage) {
+																																																		return _elm_lang$core$Json_Decode$succeed(
+																																																			{min: min, max: max, diff: diff, percentage: percentage});
+																																																	},
+																																																	A2(_elm_lang$core$Json_Decode$field, 'percentage', _elm_lang$core$Json_Decode$float));
+																																															},
+																																															A2(_elm_lang$core$Json_Decode$field, 'diff', _elm_lang$core$Json_Decode$float));
+																																													},
+																																													A2(_elm_lang$core$Json_Decode$field, 'max', _elm_lang$core$Json_Decode$float));
+																																											},
+																																											A2(_elm_lang$core$Json_Decode$field, 'min', _elm_lang$core$Json_Decode$float))),
+																																									_1: {ctor: '[]'}
+																																								}
+																																							})));
+																																			},
+																																			A2(
+																																				_elm_lang$core$Json_Decode$field,
+																																				'period15m',
+																																				_elm_lang$core$Json_Decode$oneOf(
+																																					{
+																																						ctor: '::',
+																																						_0: _elm_lang$core$Json_Decode$null(_elm_lang$core$Maybe$Nothing),
+																																						_1: {
+																																							ctor: '::',
+																																							_0: A2(
+																																								_elm_lang$core$Json_Decode$map,
+																																								_elm_lang$core$Maybe$Just,
+																																								A2(
+																																									_elm_lang$core$Json_Decode$andThen,
+																																									function (min) {
+																																										return A2(
+																																											_elm_lang$core$Json_Decode$andThen,
+																																											function (max) {
+																																												return A2(
+																																													_elm_lang$core$Json_Decode$andThen,
+																																													function (diff) {
+																																														return A2(
+																																															_elm_lang$core$Json_Decode$andThen,
+																																															function (percentage) {
+																																																return _elm_lang$core$Json_Decode$succeed(
+																																																	{min: min, max: max, diff: diff, percentage: percentage});
+																																															},
+																																															A2(_elm_lang$core$Json_Decode$field, 'percentage', _elm_lang$core$Json_Decode$float));
+																																													},
+																																													A2(_elm_lang$core$Json_Decode$field, 'diff', _elm_lang$core$Json_Decode$float));
+																																											},
+																																											A2(_elm_lang$core$Json_Decode$field, 'max', _elm_lang$core$Json_Decode$float));
+																																									},
+																																									A2(_elm_lang$core$Json_Decode$field, 'min', _elm_lang$core$Json_Decode$float))),
+																																							_1: {ctor: '[]'}
+																																						}
+																																					})));
+																																	},
+																																	A2(
+																																		_elm_lang$core$Json_Decode$field,
+																																		'period10m',
+																																		_elm_lang$core$Json_Decode$oneOf(
+																																			{
+																																				ctor: '::',
+																																				_0: _elm_lang$core$Json_Decode$null(_elm_lang$core$Maybe$Nothing),
+																																				_1: {
+																																					ctor: '::',
+																																					_0: A2(
+																																						_elm_lang$core$Json_Decode$map,
+																																						_elm_lang$core$Maybe$Just,
+																																						A2(
+																																							_elm_lang$core$Json_Decode$andThen,
+																																							function (min) {
+																																								return A2(
+																																									_elm_lang$core$Json_Decode$andThen,
+																																									function (max) {
+																																										return A2(
+																																											_elm_lang$core$Json_Decode$andThen,
+																																											function (diff) {
+																																												return A2(
+																																													_elm_lang$core$Json_Decode$andThen,
+																																													function (percentage) {
+																																														return _elm_lang$core$Json_Decode$succeed(
+																																															{min: min, max: max, diff: diff, percentage: percentage});
+																																													},
+																																													A2(_elm_lang$core$Json_Decode$field, 'percentage', _elm_lang$core$Json_Decode$float));
+																																											},
+																																											A2(_elm_lang$core$Json_Decode$field, 'diff', _elm_lang$core$Json_Decode$float));
+																																									},
+																																									A2(_elm_lang$core$Json_Decode$field, 'max', _elm_lang$core$Json_Decode$float));
+																																							},
+																																							A2(_elm_lang$core$Json_Decode$field, 'min', _elm_lang$core$Json_Decode$float))),
+																																					_1: {ctor: '[]'}
+																																				}
+																																			})));
+																															},
+																															A2(
+																																_elm_lang$core$Json_Decode$field,
+																																'period5m',
+																																_elm_lang$core$Json_Decode$oneOf(
+																																	{
+																																		ctor: '::',
+																																		_0: _elm_lang$core$Json_Decode$null(_elm_lang$core$Maybe$Nothing),
+																																		_1: {
+																																			ctor: '::',
+																																			_0: A2(
+																																				_elm_lang$core$Json_Decode$map,
+																																				_elm_lang$core$Maybe$Just,
+																																				A2(
+																																					_elm_lang$core$Json_Decode$andThen,
+																																					function (min) {
+																																						return A2(
+																																							_elm_lang$core$Json_Decode$andThen,
+																																							function (max) {
+																																								return A2(
+																																									_elm_lang$core$Json_Decode$andThen,
+																																									function (diff) {
+																																										return A2(
+																																											_elm_lang$core$Json_Decode$andThen,
+																																											function (percentage) {
+																																												return _elm_lang$core$Json_Decode$succeed(
+																																													{min: min, max: max, diff: diff, percentage: percentage});
+																																											},
+																																											A2(_elm_lang$core$Json_Decode$field, 'percentage', _elm_lang$core$Json_Decode$float));
+																																									},
+																																									A2(_elm_lang$core$Json_Decode$field, 'diff', _elm_lang$core$Json_Decode$float));
+																																							},
+																																							A2(_elm_lang$core$Json_Decode$field, 'max', _elm_lang$core$Json_Decode$float));
+																																					},
+																																					A2(_elm_lang$core$Json_Decode$field, 'min', _elm_lang$core$Json_Decode$float))),
+																																			_1: {ctor: '[]'}
+																																		}
+																																	})));
+																													},
+																													A2(
+																														_elm_lang$core$Json_Decode$field,
+																														'period3m',
+																														_elm_lang$core$Json_Decode$oneOf(
+																															{
+																																ctor: '::',
+																																_0: _elm_lang$core$Json_Decode$null(_elm_lang$core$Maybe$Nothing),
+																																_1: {
+																																	ctor: '::',
+																																	_0: A2(
+																																		_elm_lang$core$Json_Decode$map,
+																																		_elm_lang$core$Maybe$Just,
+																																		A2(
+																																			_elm_lang$core$Json_Decode$andThen,
+																																			function (min) {
+																																				return A2(
+																																					_elm_lang$core$Json_Decode$andThen,
+																																					function (max) {
+																																						return A2(
+																																							_elm_lang$core$Json_Decode$andThen,
+																																							function (diff) {
+																																								return A2(
+																																									_elm_lang$core$Json_Decode$andThen,
+																																									function (percentage) {
+																																										return _elm_lang$core$Json_Decode$succeed(
+																																											{min: min, max: max, diff: diff, percentage: percentage});
+																																									},
+																																									A2(_elm_lang$core$Json_Decode$field, 'percentage', _elm_lang$core$Json_Decode$float));
+																																							},
+																																							A2(_elm_lang$core$Json_Decode$field, 'diff', _elm_lang$core$Json_Decode$float));
+																																					},
+																																					A2(_elm_lang$core$Json_Decode$field, 'max', _elm_lang$core$Json_Decode$float));
+																																			},
+																																			A2(_elm_lang$core$Json_Decode$field, 'min', _elm_lang$core$Json_Decode$float))),
+																																	_1: {ctor: '[]'}
+																																}
+																															})));
+																											},
+																											A2(_elm_lang$core$Json_Decode$field, 'time', _elm_lang$core$Json_Decode$string));
+																									},
+																									A2(_elm_lang$core$Json_Decode$field, 'percentage', _elm_lang$core$Json_Decode$float));
+																							},
+																							A2(_elm_lang$core$Json_Decode$field, 'askPrice', _elm_lang$core$Json_Decode$float));
+																					},
+																					A2(_elm_lang$core$Json_Decode$field, 'bidPrice', _elm_lang$core$Json_Decode$float));
+																			},
+																			A2(_elm_lang$core$Json_Decode$field, 'btcVolume', _elm_lang$core$Json_Decode$float));
+																	},
+																	A2(_elm_lang$core$Json_Decode$field, 'volume', _elm_lang$core$Json_Decode$float));
+															},
+															A2(_elm_lang$core$Json_Decode$field, 'to', _elm_lang$core$Json_Decode$float));
+													},
+													A2(_elm_lang$core$Json_Decode$field, 'from', _elm_lang$core$Json_Decode$float));
+											},
+											A2(_elm_lang$core$Json_Decode$field, 'market', _elm_lang$core$Json_Decode$string));
+									},
+									A2(_elm_lang$core$Json_Decode$field, 'quote', _elm_lang$core$Json_Decode$string));
+							},
+							A2(_elm_lang$core$Json_Decode$field, 'base', _elm_lang$core$Json_Decode$string));
+					},
+					A2(_elm_lang$core$Json_Decode$field, 'marketId', _elm_lang$core$Json_Decode$string));
+			},
+			A2(_elm_lang$core$Json_Decode$field, 'exchange', _elm_lang$core$Json_Decode$string))));
 var _user$project$Main$receiveFavorites = _elm_lang$core$Native_Platform.incomingPort('receiveFavorites', _elm_lang$core$Json_Decode$value);
 var _user$project$Main$receiveTrade = _elm_lang$core$Native_Platform.incomingPort('receiveTrade', _elm_lang$core$Json_Decode$value);
 var _user$project$Main$receiveOrder = _elm_lang$core$Native_Platform.incomingPort(

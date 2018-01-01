@@ -52,6 +52,10 @@ defmodule CryptoScanner.CoinigyServer do
     GenServer.call(pid, :get_coins)
   end
 
+  # def get_hot(period, percentage) do
+  #   GenServer.call(:coinigy, {:get_hot, period, percentage})
+  # end
+
   def pong_ws_client(pid, ping) do
     GenServer.cast(pid, {:pong_ws_client, ping})
   end
@@ -75,6 +79,35 @@ defmodule CryptoScanner.CoinigyServer do
   def handle_call(:get_coins, _from, state) do
     {:reply, {:ok, state.coins}, state}
   end
+
+  # def handle_call({:get_hot, period, value}, _from, state) do
+  #   coins =
+  #     state.coins
+  #     |> Enum.filter(fn c ->
+  #       percent = c["period_" <> period]["percentage"]
+  #       (value < 0 && percent <= value) || (value > 0 && percent >= value)
+  #     end)
+  #     |> Enum.map(fn c ->
+  #       period = c["period_" <> period]
+  #
+  #       [ base, quote ] = String.split(c["label"])
+  #
+  #       %Coin{
+  #         exchange: c["exchange"],
+  #         symbol: c["label"],
+  #         base: base,
+  #         quote: quote,
+  #         volume: c["volume_btc"],
+  #         bidPrice: c["bid_price"],
+  #         askPrice: c["ask_price"],
+  #         from: period["max"],
+  #         to: period["min"],
+  #         percentage: period["percentage"]
+  #       }
+  #     end)
+  #
+  #   {:reply, {:ok, coins}, state}
+  # end
 
   def handle_cast({:pong_ws_client, ping}, state) do
     CoinigyClient.pong(state.ws_client, ping)
@@ -140,6 +173,8 @@ defmodule CryptoScanner.CoinigyServer do
 
         %{ state | coins: [new_coin | state.coins] }
       end
+
+    CryptoScannerWeb.Endpoint.broadcast("scanner:alerts", "tick_alert", %{"coins" => new_state.coins})
 
     {:noreply, new_state}
   end

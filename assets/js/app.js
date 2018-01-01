@@ -39,6 +39,33 @@ app.ports.deleteUser.subscribe(function(){
 });
 
 // app.ports.setFilter.subscribe(filter => {
-//   console.log(">>>>> Setting filter ", filter)
-//   // channel.push("set_filter", filter)
+//   console.log("Setting filter >>>>> ", filter)
+//   channel.push("set_filter", filter)
 // })
+
+// app ports for elm and/or business logic
+const socket = new Socket("/socket")
+socket.connect()
+
+// Now that you are connected, you can join channels with a topic:
+const channel = socket.channel("scanner:alerts", {})
+
+channel.join()
+  .receive("ok", resp => { console.log("Joined successfully") })
+  .receive("error", resp => { console.log("Unable to join", resp) })
+
+channel.push("set_filter", { period: "5m", percentage: -4})
+
+channel.on("tick_alert", payload => {
+  console.log(`[${Date()}] Alert`, payload.coins);
+  const coins = payload.coins.map(c => {
+    return Object.assign({}, c, {
+      volume: Number.parseFloat(c.volume),
+      bidPrice: Number.parseFloat(c.bidPrice),
+      askPrice: Number.parseFloat(c.askPrice),
+      percentage: Number.parseFloat(c.percentage.toFixed(2)),
+      time: Date.now()
+    })
+  })
+  app.ports.newAlert.send(coins)
+})

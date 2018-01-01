@@ -255,8 +255,13 @@ port startSockets : { user : User, exchanges : List Coin } -> Cmd msg
 
 
 
--- port setFilter : Filter -> Cmd msg
--- port newAlert : (List Coin -> msg) -> Sub msg
+-- port setFilter : Va -> Cmd msg
+
+
+port newAlert : (List Coin -> msg) -> Sub msg
+
+
+
 -- port newFavorite : (JD.Value -> msg) -> Sub msg
 
 
