@@ -45,7 +45,8 @@ init flags =
         cmd =
             if not (String.isEmpty model.user.id) then
                 ( { model | isLoading = True }
-                , Cmd.batch [ listExchanges model, getWatchList model ]
+                , Cmd.batch [ listExchanges model ]
+                  --, getWatchList model ]
                 )
             else
                 ( model, Cmd.none )
@@ -68,7 +69,7 @@ initialModel =
     , exchanges = []
     , availableExchanges = []
     , error = Nothing
-    , content = MarketWatch
+    , content = DaytradeScanner
     , coinigySocketsConnected = False
     , transactionsBook = []
     , orderBook = []
@@ -192,6 +193,7 @@ type alias Coin =
     , market : String
     , from : Float
     , to : Float
+    , lastPrice : Float
     , volume : Float
     , btcVolume : Float
     , bidPrice : Float
@@ -404,8 +406,8 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     if not (String.isEmpty model.user.id) then
         Sub.batch
-            [ Time.every (60 * Time.second) UpdateWatchMarket
-            , coinigySocketConnection CoinigySocketConnection
+            [ --Time.every (60 * Time.second) UpdateWatchMarket
+              coinigySocketConnection CoinigySocketConnection
 
             -- , receiveTrade (handleTrade model)
             -- , receiveOrder (handleOrder model)
@@ -435,14 +437,17 @@ type Msg
     | UpdateUserSetup
     | ExchangesResponse (Result Http.Error (List Exchange))
     | UserKeysResponse (Result Http.Error User)
-    | WatchListResponse (Result Http.Error (List Coin))
+      -- | WatchListResponse (Result Http.Error (List Coin))
     | CoinigySocketConnection Bool
     | ResetFilter
     | DeleteError
     | ToggleSound
     | SetContent Content
     | Logout
-    | UpdateWatchMarket Time.Time
+
+
+
+-- | UpdateWatchMarket Time.Time
 
 
 removeNewCoins : List Coin -> Coin -> Bool
@@ -612,9 +617,8 @@ update msg model =
         UpdateUserSetup ->
             updateUserSetup model
 
-        UpdateWatchMarket _ ->
-            ( { model | isLoading = True }, getWatchList model )
-
+        -- UpdateWatchMarket _ ->
+        --     ( { model | isLoading = True }, getWatchList model )
         UserKeysResponse (Ok user) ->
             let
                 newUser =
@@ -632,7 +636,8 @@ update msg model =
                     }
             in
                 ( newModel
-                , Cmd.batch [ saveUser newUser, getWatchList newModel ]
+                , Cmd.batch [ saveUser newUser ]
+                  --, getWatchList newModel ]
                 )
 
         UserKeysResponse (Err err) ->
@@ -646,62 +651,60 @@ update msg model =
         ExchangesResponse (Err err) ->
             handleResponseErrors model err "Fail to list exchanges"
 
-        WatchListResponse (Ok res) ->
-            let
-                setupStep =
-                    if List.length res > 0 then
-                        None
-                    else
-                        ExchangesSetup
-
-                cmd =
-                    if not model.coinigySocketsConnected then
-                        startSockets { user = model.user, exchanges = res }
-                    else
-                        Cmd.none
-
-                oldMarkets =
-                    model.watchMarkets
-                        |> List.map
-                            (\m ->
-                                let
-                                    newMarket =
-                                        res
-                                            |> List.filter (\r -> r.marketId == m.marketId)
-                                            |> List.head
-                                in
-                                    case newMarket of
-                                        Just nm ->
-                                            { nm | askPrice = m.askPrice, bidPrice = m.bidPrice }
-
-                                        Nothing ->
-                                            m
-                            )
-
-                newMarkets =
-                    res
-                        |> List.filter
-                            (\r ->
-                                List.length (List.filter (\m -> m.marketId == r.marketId) model.watchMarkets) == 0
-                            )
-
-                finalMarkets =
-                    calcPercentages
-                        (newMarkets ++ oldMarkets)
-                        model.history
-            in
-                ( { model
-                    | watchMarkets = finalMarkets
-                    , history = (finalMarkets ++ model.history)
-                    , isLoading = False
-                    , setupStep = setupStep
-                  }
-                , cmd
-                )
-
-        WatchListResponse (Err err) ->
-            handleResponseErrors model err "Fail to get watched coins"
-
+        -- WatchListResponse (Ok res) ->
+        --     let
+        --         setupStep =
+        --             if List.length res > 0 then
+        --                 None
+        --             else
+        --                 ExchangesSetup
+        --
+        --         cmd =
+        --             if not model.coinigySocketsConnected then
+        --                 startSockets { user = model.user, exchanges = res }
+        --             else
+        --                 Cmd.none
+        --
+        --         oldMarkets =
+        --             model.watchMarkets
+        --                 |> List.map
+        --                     (\m ->
+        --                         let
+        --                             newMarket =
+        --                                 res
+        --                                     |> List.filter (\r -> r.marketId == m.marketId)
+        --                                     |> List.head
+        --                         in
+        --                             case newMarket of
+        --                                 Just nm ->
+        --                                     { nm | askPrice = m.askPrice, bidPrice = m.bidPrice }
+        --
+        --                                 Nothing ->
+        --                                     m
+        --                     )
+        --
+        --         newMarkets =
+        --             res
+        --                 |> List.filter
+        --                     (\r ->
+        --                         List.length (List.filter (\m -> m.marketId == r.marketId) model.watchMarkets) == 0
+        --                     )
+        --
+        --         finalMarkets =
+        --             calcPercentages
+        --                 (newMarkets ++ oldMarkets)
+        --                 model.history
+        --     in
+        --         ( { model
+        --             | watchMarkets = finalMarkets
+        --             , isLoading = False
+        --             , setupStep = setupStep
+        --           }
+        --         , cmd
+        --         )
+        --
+        -- WatchListResponse (Err err) ->
+        --     handleResponseErrors model err "Fail to get watched coins"
         UpdateCoinigyKey key ->
             let
                 user =
@@ -911,6 +914,7 @@ watchListCoinDecoder =
                         0.0
                         0.0
                         0.0
+                        0.0
                         serverTime
                         Nothing
                         Nothing
@@ -939,35 +943,33 @@ watchListCoinDecoder =
 -- proxyUrl : String
 -- proxyUrl =
 --     "http://localhost:3031"
-
-
-getWatchList : Model -> Cmd Msg
-getWatchList model =
-    let
-        apiKey =
-            Http.header "X-API-KEY" model.user.apiKey
-
-        apiSecret =
-            Http.header "X-API-SECRET" model.user.apiSecret
-
-        url =
-            "/api/coinigy/my-markets"
-
-        request =
-            Http.request
-                { method = "GET"
-                , headers = [ apiKey, apiSecret ]
-                , url = url
-                , body = Http.emptyBody
-                , expect = Http.expectJson watchListCoinDecoder
-                , timeout = Nothing
-                , withCredentials = False
-                }
-
-        cmd =
-            Http.send WatchListResponse request
-    in
-        cmd
+-- getWatchList : Model -> Cmd Msg
+-- getWatchList model =
+--     let
+--         apiKey =
+--             Http.header "X-API-KEY" model.user.apiKey
+--
+--         apiSecret =
+--             Http.header "X-API-SECRET" model.user.apiSecret
+--
+--         url =
+--             "/api/coinigy/my-markets"
+--
+--         request =
+--             Http.request
+--                 { method = "GET"
+--                 , headers = [ apiKey, apiSecret ]
+--                 , url = url
+--                 , body = Http.emptyBody
+--                 , expect = Http.expectJson watchListCoinDecoder
+--                 , timeout = Nothing
+--                 , withCredentials = False
+--                 }
+--
+--         cmd =
+--             Http.send WatchListResponse request
+--     in
+--         cmd
 
 
 listExchanges : Model -> Cmd Msg
@@ -1305,10 +1307,10 @@ filterModal model =
                     UpdatePercentage
                 , fieldInput
                     model
-                    "Volume"
+                    "Current Period Volume (USD)"
                     volume
-                    "10"
-                    "btc"
+                    "50000"
+                    "dollar"
                     UpdateVolume
                 ]
             ]
@@ -1415,8 +1417,8 @@ setupModal model =
             cancelButton
 
 
-coinCard : Coin -> Html Msg
-coinCard coin =
+coinCard : Coin -> Filter -> Html Msg
+coinCard coin filter =
     let
         pairName =
             coin.base ++ "/" ++ coin.quote
@@ -1428,7 +1430,33 @@ coinCard coin =
             toString coin.percentage ++ "% "
 
         exchangeUrl =
-            "https://www.binance.com/trade.html?symbol=" ++ coin.market
+            case coin.exchange of
+                "BINA" ->
+                    "https://www.binance.com/trade.html?symbol="
+                        ++ (coin.market
+                                |> String.split "/"
+                                |> String.join "_"
+                           )
+
+                "HITB" ->
+                    "https://www.hitbtc.com/exchange/" ++ coin.base ++ "-to-" ++ coin.quote
+
+                "PLNX" ->
+                    "https://poloniex.com/exchange#"
+                        ++ (coin.market
+                                |> String.split "/"
+                                |> String.join "_"
+                           )
+
+                "LIQU" ->
+                    "https://liqui.io/#/exchange/"
+                        ++ (coin.market
+                                |> String.split "/"
+                                |> String.join "_"
+                           )
+
+                _ ->
+                    "#"
 
         coinigyUrl =
             "https://www.coinigy.com/main/markets/"
@@ -1439,7 +1467,7 @@ coinCard coin =
                 ++ coin.quote
 
         cryptoCompare =
-            "https://www.cryptocompare.com/coins/" ++ coin.base ++ "/influence"
+            "https://www.cryptocompare.com/coins/" ++ coin.base ++ "/forum"
 
         ( titleColor, percentIcon ) =
             if coin.percentage < 0 then
@@ -1455,26 +1483,26 @@ coinCard coin =
     in
         div [ class "column coin-column" ]
             [ div [ class "card" ]
-                [ div [ class "card-header" ]
-                    [ div [ class "card-header-title is-centered" ]
-                        [ div [ class "has-text-centered" ]
-                            [ h1 [ class ("title is-1 " ++ titleColor) ]
-                                [ text percentage, percentIcon ]
-                            , p [ class "heading" ] [ text "Volume" ]
-                            , p [ class "subtitle" ]
-                                [ text (toString coin.volume) ]
-                            ]
-                        ]
-                    ]
-                , div [ class "card-content" ]
+                [ div [ class "card-content" ]
                     [ div
                         [ class "content" ]
-                        [ p []
-                            [ strong [] [ text pairName ]
-                            , text " "
-                            , small [] [ text exchangeName ]
-                            , text " "
-                            , small [ class "is-pulled-right" ] [ text "36s" ]
+                        [ nav [ class "level" ]
+                            [ div [ class "level-left" ]
+                                [ div [ class "level-item" ]
+                                    [ h3
+                                        [ class ("title is-3 " ++ titleColor) ]
+                                        [ text percentage, percentIcon ]
+                                    ]
+                                , div [ class "level-item" ]
+                                    [ strong [] [ text pairName ]
+                                    ]
+                                , div [ class "level-item" ]
+                                    [ small [] [ text exchangeName ] ]
+                                ]
+                            , div [ class "level-right" ]
+                                [ div [ class "level-item" ]
+                                    [ small [ class "is-pulled-right" ] [ text "36s" ] ]
+                                ]
                             ]
                         , nav [ class "level" ]
                             [ div [ class "level-item has-text-centered" ]
@@ -1493,6 +1521,15 @@ coinCard coin =
                                 ]
                             , div [ class "level-item has-text-centered" ]
                                 [ div []
+                                    [ p [ class "heading" ] [ text "Last Price" ]
+                                    , p [ class "title is-5" ]
+                                        [ text (toString coin.lastPrice) ]
+                                    ]
+                                ]
+                            ]
+                        , nav [ class "level" ]
+                            [ div [ class "level-item has-text-centered" ]
+                                [ div []
                                     [ p [ class "heading" ] [ text "Bid" ]
                                     , p [ class "title is-5" ]
                                         [ text (toString coin.bidPrice) ]
@@ -1503,6 +1540,20 @@ coinCard coin =
                                     [ p [ class "heading" ] [ text "Ask" ]
                                     , p [ class "title is-5" ]
                                         [ text (toString coin.askPrice) ]
+                                    ]
+                                ]
+                            , div [ class "level-item has-text-centered" ]
+                                [ div []
+                                    [ p [ class "heading" ]
+                                        [ text
+                                            (coin.quote
+                                                ++ " Volume ("
+                                                ++ (periodToString filter.period)
+                                                ++ ")"
+                                            )
+                                        ]
+                                    , p [ class "title is-5" ]
+                                        [ text (FormatNumber.format usLocale coin.volume) ]
                                     ]
                                 ]
                             ]
@@ -1663,19 +1714,20 @@ mainContent model =
                                 , text "My Reports"
                                 ]
                             ]
-                        , li
-                            [ class
-                                (if model.content == MarketWatch then
-                                    "is-active"
-                                 else
-                                    ""
-                                )
-                            ]
-                            [ a [ onClick (SetContent MarketWatch) ]
-                                [ icon "star" False False
-                                , text "Favorites"
-                                ]
-                            ]
+
+                        -- , li
+                        --     [ class
+                        --         (if model.content == MarketWatch then
+                        --             "is-active"
+                        --          else
+                        --             ""
+                        --         )
+                        --     ]
+                        --     [ a [ onClick (SetContent MarketWatch) ]
+                        --         [ icon "star" False False
+                        --         , text "Favorites"
+                        --         ]
+                        --     ]
                         ]
                     ]
 
@@ -1799,17 +1851,15 @@ scannerContent model =
                     (model.coins
                         |> List.sortBy .percentage
                         |> List.map
-                            (\c -> coinCard c)
+                            (\c -> coinCard c filter)
                     )
             else
                 p [] [ text "Go relax man! No scanner alerts... at least for now!" ]
     in
         div []
-            [ div [ class "has-text-right" ]
+            [ div [ class "has-text-right filter-link" ]
                 [ a
-                    [ class "filter-link"
-                    , onClick ShowFilter
-                    ]
+                    [ onClick ShowFilter ]
                     [ text filtering, icon "cog" False False ]
                 ]
             , content

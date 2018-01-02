@@ -44,16 +44,25 @@ defmodule CryptoScannerWeb.ScannerChannel do
 
         [ base, quote ] = String.split(c["label"], "/")
 
+        { from, to, time } =
+          if period["max"] > period["min"] do
+            { period["max"], period["min"], period["min_time"] }
+          else
+            { period["min"], period["max"], period["max_time"] }
+          end
+
         %Coin{
           exchange: c["exchange"],
           symbol: c["label"],
           base: base,
           quote: quote,
-          volume: c["volume_btc"],
+          volume: period["volume"],
           bidPrice: c["bid_price"],
           askPrice: c["ask_price"],
-          from: period["max"],
-          to: period["min"],
+          from: from,
+          to: to,
+          lastPrice: c["last_price"],
+          time: time,
           percentage: period["percentage"],
           period3m: c["period_3m"],
           period5m: c["period_5m"],

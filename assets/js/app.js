@@ -71,6 +71,7 @@ channel.on("tick_alert", payload => {
       btcVolume: Number.parseFloat(c.volume),
       bidPrice: Number.parseFloat(c.bidPrice),
       askPrice: Number.parseFloat(c.askPrice),
+      lastPrice: Number.parseFloat(c.lastPrice || 0),
       percentage: Number.parseFloat(c.percentage.toFixed(2)),
       time: (new Date).toString()
     })

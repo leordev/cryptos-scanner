@@ -61,8 +61,12 @@ defmodule CryptoScanner.CoinigyServer do
     GenServer.call(:coinigy, {:subscribe_to_channels, exch, base})
   end
 
-  def get_coins(pid) do
-    GenServer.call(pid, :get_coins)
+  def get_coins() do
+    GenServer.call(:coinigy, :get_coins)
+  end
+
+  def get_coin(exch, market) do
+    GenServer.call(:coinigy, {:get_coin, exch, market})
   end
 
   def get_subscriptions() do
@@ -111,6 +115,13 @@ defmodule CryptoScanner.CoinigyServer do
 
   def handle_call(:get_coins, _from, state) do
     {:reply, {:ok, state.coins}, state}
+  end
+
+  def handle_call({:get_coin, exch, market}, _from, state) do
+    coin = state.coins
+      |> Enum.find(nil, fn c -> c["exchange"] == exch && c["label"] == market end)
+
+    {:reply, {:ok, coin}, state}
   end
 
   def handle_call(:get_ws_subscriptions, _from, state) do
@@ -190,7 +201,11 @@ defmodule CryptoScanner.CoinigyServer do
     coin = state.coins
       |> Enum.find(nil, fn i -> compare_coin(i, data) end)
 
-    raw_price = %{"price" => data["price"], "time" => data["time"]}
+    raw_price = %{
+      "price" => data["price"],
+      "quantity" => data["quantity"],
+      "time" => data["time"]
+    }
     # Logger.info("New Trade to add: #{inspect(raw_price)}")
 
     new_state =
@@ -306,39 +321,78 @@ defmodule CryptoScanner.CoinigyServer do
   end
 
   defp calc_price_percentage_time(coin, time) do
-    time = div(System.os_time - (time * 60 * 1000 * 1_000_000), 1_000_000)
+    time = System.os_time - (time * 60 * 1000 * 1_000_000)
 
-    prices = coin["prices"]
+    {min_price, min_time, max_price, max_time, volume} = coin["prices"]
       |> Enum.filter(&(&1["time"] >= time))
-      |> Enum.map(&(&1["price"]))
+      |> Enum.reduce({0.0, 0, 0.0, 0, 0},
+        fn (i, {min_price, min_time, max_price, max_time, vol}) ->
+          %{"price" => price, "time" => time, "quantity" => qty} = i
 
-    if Enum.count(prices) > 0 do
-      prices_max = prices |> Enum.max
-      prices_min = prices |> Enum.min
-      prices_diff = (prices_max - prices_min) * -1
+          vol = vol + (price * qty)
+
+          cond do
+            min_price == 0.0 -> {price, time, price, time, vol}
+            price <= min_price -> {price, time, max_price, max_time, vol}
+            price >= max_price -> {min_price, min_time, price, time, vol}
+            true -> {min_price, min_time, max_price, max_time, vol}
+          end
+        end
+      )
+
+      prices_diff = max_price - min_price
+
       prices_percentage = if abs(prices_diff) > 0 do
-        ((prices_min / prices_max) - 1) * 100
+        ((min_price / max_price) - 1) * 100
       else
         0
       end
 
-      res = %{
-        "min" => prices_min,
-        "max" => prices_max,
-        "diff" => prices_diff,
-        "percentage" => prices_percentage
-      }
+      if max_time > min_time do
+        prices_percentage = prices_percentage * -1
+      end
 
-      # Logger.info("Price #{coin["symbol"]} - #{inspect(res)}")
-
-      res
-    else
       %{
-        "min" => 0,
-        "max" => 0,
-        "diff" => 0,
-        "percentage" => 0
+        "min" => min_price,
+        "min_time" => min_time,
+        "max" => max_price,
+        "max_time" => min_time,
+        "diff" => prices_diff,
+        "percentage" => prices_percentage,
+        "volume" => volume
       }
-    end
+
+    # prices = coin["prices"]
+    #   |> Enum.filter(&(&1["time"] >= time))
+    #   |> Enum.map(&(&1["price"]))
+    #
+    # if Enum.count(prices) > 0 do
+    #   prices_max = prices |> Enum.max
+    #   prices_min = prices |> Enum.min
+    #   prices_diff = (prices_max - prices_min) * -1
+    #   prices_percentage = if abs(prices_diff) > 0 do
+    #     ((prices_min / prices_max) - 1) * 100
+    #   else
+    #     0
+    #   end
+    #
+    #   res = %{
+    #     "min" => prices_min,
+    #     "max" => prices_max,
+    #     "diff" => prices_diff,
+    #     "percentage" => prices_percentage
+    #   }
+    #
+    #   # Logger.info("Price #{coin["symbol"]} - #{inspect(res)}")
+    #
+    #   res
+    # else
+    #   %{
+    #     "min" => 0,
+    #     "max" => 0,
+    #     "diff" => 0,
+    #     "percentage" => 0
+    #   }
+    # end
   end
 end

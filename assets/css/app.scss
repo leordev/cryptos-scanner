@@ -31,6 +31,10 @@ form {
 }
 
 .filter-link {
+  margin: 20px;
+}
+
+.filter-link a {
   color: $blue;
   border-bottom: 1px dashed $blue;
 }

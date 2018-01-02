@@ -153,6 +153,7 @@ channel.on("tick_alert", function (payload) {
       btcVolume: Number.parseFloat(c.volume),
       bidPrice: Number.parseFloat(c.bidPrice),
       askPrice: Number.parseFloat(c.askPrice),
+      lastPrice: Number.parseFloat(c.lastPrice || 0),
       percentage: Number.parseFloat(c.percentage.toFixed(2)),
       time: new Date().toString()
     });
@@ -15117,551 +15118,11 @@ var _elm_lang$http$Http$StringPart = F2(
 	});
 var _elm_lang$http$Http$stringPart = _elm_lang$http$Http$StringPart;
 
-var _user$project$Main$coinCard = function (coin) {
-	var _p0 = (_elm_lang$core$Native_Utils.cmp(coin.percentage, 0) < 0) ? {
-		ctor: '_Tuple2',
-		_0: 'has-text-danger',
-		_1: A2(
-			_elm_lang$html$Html$span,
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('icon'),
-				_1: {ctor: '[]'}
-			},
-			{
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$i,
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$class('fa fa-caret-down'),
-						_1: {ctor: '[]'}
-					},
-					{ctor: '[]'}),
-				_1: {ctor: '[]'}
-			})
-	} : {
-		ctor: '_Tuple2',
-		_0: 'has-text-success',
-		_1: A2(
-			_elm_lang$html$Html$span,
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('icon'),
-				_1: {ctor: '[]'}
-			},
-			{
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$i,
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$class('fa fa-caret-up'),
-						_1: {ctor: '[]'}
-					},
-					{ctor: '[]'}),
-				_1: {ctor: '[]'}
-			})
-	};
-	var titleColor = _p0._0;
-	var percentIcon = _p0._1;
-	var cryptoCompare = A2(
-		_elm_lang$core$Basics_ops['++'],
-		'https://www.cryptocompare.com/coins/',
-		A2(_elm_lang$core$Basics_ops['++'], coin.base, '/influence'));
-	var coinigyUrl = A2(
-		_elm_lang$core$Basics_ops['++'],
-		'https://www.coinigy.com/main/markets/',
-		A2(
-			_elm_lang$core$Basics_ops['++'],
-			coin.exchange,
-			A2(
-				_elm_lang$core$Basics_ops['++'],
-				'/',
-				A2(
-					_elm_lang$core$Basics_ops['++'],
-					coin.base,
-					A2(_elm_lang$core$Basics_ops['++'], '/', coin.quote)))));
-	var exchangeUrl = A2(_elm_lang$core$Basics_ops['++'], 'https://www.binance.com/trade.html?symbol=', coin.market);
-	var percentage = A2(
-		_elm_lang$core$Basics_ops['++'],
-		_elm_lang$core$Basics$toString(coin.percentage),
-		'% ');
-	var exchangeName = A2(_elm_lang$core$Basics_ops['++'], '@ ', coin.exchange);
-	var pairName = A2(
-		_elm_lang$core$Basics_ops['++'],
-		coin.base,
-		A2(_elm_lang$core$Basics_ops['++'], '/', coin.quote));
-	return A2(
-		_elm_lang$html$Html$div,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('column coin-column'),
-			_1: {ctor: '[]'}
-		},
-		{
-			ctor: '::',
-			_0: A2(
-				_elm_lang$html$Html$div,
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$class('card'),
-					_1: {ctor: '[]'}
-				},
-				{
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$div,
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('card-header'),
-							_1: {ctor: '[]'}
-						},
-						{
-							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$div,
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$class('card-header-title is-centered'),
-									_1: {ctor: '[]'}
-								},
-								{
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$div,
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$class('has-text-centered'),
-											_1: {ctor: '[]'}
-										},
-										{
-											ctor: '::',
-											_0: A2(
-												_elm_lang$html$Html$h1,
-												{
-													ctor: '::',
-													_0: _elm_lang$html$Html_Attributes$class(
-														A2(_elm_lang$core$Basics_ops['++'], 'title is-1 ', titleColor)),
-													_1: {ctor: '[]'}
-												},
-												{
-													ctor: '::',
-													_0: _elm_lang$html$Html$text(percentage),
-													_1: {
-														ctor: '::',
-														_0: percentIcon,
-														_1: {ctor: '[]'}
-													}
-												}),
-											_1: {
-												ctor: '::',
-												_0: A2(
-													_elm_lang$html$Html$p,
-													{
-														ctor: '::',
-														_0: _elm_lang$html$Html_Attributes$class('heading'),
-														_1: {ctor: '[]'}
-													},
-													{
-														ctor: '::',
-														_0: _elm_lang$html$Html$text('Volume'),
-														_1: {ctor: '[]'}
-													}),
-												_1: {
-													ctor: '::',
-													_0: A2(
-														_elm_lang$html$Html$p,
-														{
-															ctor: '::',
-															_0: _elm_lang$html$Html_Attributes$class('subtitle'),
-															_1: {ctor: '[]'}
-														},
-														{
-															ctor: '::',
-															_0: _elm_lang$html$Html$text(
-																_elm_lang$core$Basics$toString(coin.volume)),
-															_1: {ctor: '[]'}
-														}),
-													_1: {ctor: '[]'}
-												}
-											}
-										}),
-									_1: {ctor: '[]'}
-								}),
-							_1: {ctor: '[]'}
-						}),
-					_1: {
-						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$div,
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$class('card-content'),
-								_1: {ctor: '[]'}
-							},
-							{
-								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$div,
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$class('content'),
-										_1: {ctor: '[]'}
-									},
-									{
-										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$p,
-											{ctor: '[]'},
-											{
-												ctor: '::',
-												_0: A2(
-													_elm_lang$html$Html$strong,
-													{ctor: '[]'},
-													{
-														ctor: '::',
-														_0: _elm_lang$html$Html$text(pairName),
-														_1: {ctor: '[]'}
-													}),
-												_1: {
-													ctor: '::',
-													_0: _elm_lang$html$Html$text(' '),
-													_1: {
-														ctor: '::',
-														_0: A2(
-															_elm_lang$html$Html$small,
-															{ctor: '[]'},
-															{
-																ctor: '::',
-																_0: _elm_lang$html$Html$text(exchangeName),
-																_1: {ctor: '[]'}
-															}),
-														_1: {
-															ctor: '::',
-															_0: _elm_lang$html$Html$text(' '),
-															_1: {
-																ctor: '::',
-																_0: A2(
-																	_elm_lang$html$Html$small,
-																	{
-																		ctor: '::',
-																		_0: _elm_lang$html$Html_Attributes$class('is-pulled-right'),
-																		_1: {ctor: '[]'}
-																	},
-																	{
-																		ctor: '::',
-																		_0: _elm_lang$html$Html$text('36s'),
-																		_1: {ctor: '[]'}
-																	}),
-																_1: {ctor: '[]'}
-															}
-														}
-													}
-												}
-											}),
-										_1: {
-											ctor: '::',
-											_0: A2(
-												_elm_lang$html$Html$nav,
-												{
-													ctor: '::',
-													_0: _elm_lang$html$Html_Attributes$class('level'),
-													_1: {ctor: '[]'}
-												},
-												{
-													ctor: '::',
-													_0: A2(
-														_elm_lang$html$Html$div,
-														{
-															ctor: '::',
-															_0: _elm_lang$html$Html_Attributes$class('level-item has-text-centered'),
-															_1: {ctor: '[]'}
-														},
-														{
-															ctor: '::',
-															_0: A2(
-																_elm_lang$html$Html$div,
-																{ctor: '[]'},
-																{
-																	ctor: '::',
-																	_0: A2(
-																		_elm_lang$html$Html$p,
-																		{
-																			ctor: '::',
-																			_0: _elm_lang$html$Html_Attributes$class('heading'),
-																			_1: {ctor: '[]'}
-																		},
-																		{
-																			ctor: '::',
-																			_0: _elm_lang$html$Html$text('From'),
-																			_1: {ctor: '[]'}
-																		}),
-																	_1: {
-																		ctor: '::',
-																		_0: A2(
-																			_elm_lang$html$Html$p,
-																			{
-																				ctor: '::',
-																				_0: _elm_lang$html$Html_Attributes$class('title is-5'),
-																				_1: {ctor: '[]'}
-																			},
-																			{
-																				ctor: '::',
-																				_0: _elm_lang$html$Html$text(
-																					_elm_lang$core$Basics$toString(coin.from)),
-																				_1: {ctor: '[]'}
-																			}),
-																		_1: {ctor: '[]'}
-																	}
-																}),
-															_1: {ctor: '[]'}
-														}),
-													_1: {
-														ctor: '::',
-														_0: A2(
-															_elm_lang$html$Html$div,
-															{
-																ctor: '::',
-																_0: _elm_lang$html$Html_Attributes$class('level-item has-text-centered'),
-																_1: {ctor: '[]'}
-															},
-															{
-																ctor: '::',
-																_0: A2(
-																	_elm_lang$html$Html$div,
-																	{ctor: '[]'},
-																	{
-																		ctor: '::',
-																		_0: A2(
-																			_elm_lang$html$Html$p,
-																			{
-																				ctor: '::',
-																				_0: _elm_lang$html$Html_Attributes$class('heading'),
-																				_1: {ctor: '[]'}
-																			},
-																			{
-																				ctor: '::',
-																				_0: _elm_lang$html$Html$text('To'),
-																				_1: {ctor: '[]'}
-																			}),
-																		_1: {
-																			ctor: '::',
-																			_0: A2(
-																				_elm_lang$html$Html$p,
-																				{
-																					ctor: '::',
-																					_0: _elm_lang$html$Html_Attributes$class('title is-5'),
-																					_1: {ctor: '[]'}
-																				},
-																				{
-																					ctor: '::',
-																					_0: _elm_lang$html$Html$text(
-																						_elm_lang$core$Basics$toString(coin.to)),
-																					_1: {ctor: '[]'}
-																				}),
-																			_1: {ctor: '[]'}
-																		}
-																	}),
-																_1: {ctor: '[]'}
-															}),
-														_1: {
-															ctor: '::',
-															_0: A2(
-																_elm_lang$html$Html$div,
-																{
-																	ctor: '::',
-																	_0: _elm_lang$html$Html_Attributes$class('level-item has-text-centered'),
-																	_1: {ctor: '[]'}
-																},
-																{
-																	ctor: '::',
-																	_0: A2(
-																		_elm_lang$html$Html$div,
-																		{ctor: '[]'},
-																		{
-																			ctor: '::',
-																			_0: A2(
-																				_elm_lang$html$Html$p,
-																				{
-																					ctor: '::',
-																					_0: _elm_lang$html$Html_Attributes$class('heading'),
-																					_1: {ctor: '[]'}
-																				},
-																				{
-																					ctor: '::',
-																					_0: _elm_lang$html$Html$text('Bid'),
-																					_1: {ctor: '[]'}
-																				}),
-																			_1: {
-																				ctor: '::',
-																				_0: A2(
-																					_elm_lang$html$Html$p,
-																					{
-																						ctor: '::',
-																						_0: _elm_lang$html$Html_Attributes$class('title is-5'),
-																						_1: {ctor: '[]'}
-																					},
-																					{
-																						ctor: '::',
-																						_0: _elm_lang$html$Html$text(
-																							_elm_lang$core$Basics$toString(coin.bidPrice)),
-																						_1: {ctor: '[]'}
-																					}),
-																				_1: {ctor: '[]'}
-																			}
-																		}),
-																	_1: {ctor: '[]'}
-																}),
-															_1: {
-																ctor: '::',
-																_0: A2(
-																	_elm_lang$html$Html$div,
-																	{
-																		ctor: '::',
-																		_0: _elm_lang$html$Html_Attributes$class('level-item has-text-centered'),
-																		_1: {ctor: '[]'}
-																	},
-																	{
-																		ctor: '::',
-																		_0: A2(
-																			_elm_lang$html$Html$div,
-																			{ctor: '[]'},
-																			{
-																				ctor: '::',
-																				_0: A2(
-																					_elm_lang$html$Html$p,
-																					{
-																						ctor: '::',
-																						_0: _elm_lang$html$Html_Attributes$class('heading'),
-																						_1: {ctor: '[]'}
-																					},
-																					{
-																						ctor: '::',
-																						_0: _elm_lang$html$Html$text('Ask'),
-																						_1: {ctor: '[]'}
-																					}),
-																				_1: {
-																					ctor: '::',
-																					_0: A2(
-																						_elm_lang$html$Html$p,
-																						{
-																							ctor: '::',
-																							_0: _elm_lang$html$Html_Attributes$class('title is-5'),
-																							_1: {ctor: '[]'}
-																						},
-																						{
-																							ctor: '::',
-																							_0: _elm_lang$html$Html$text(
-																								_elm_lang$core$Basics$toString(coin.askPrice)),
-																							_1: {ctor: '[]'}
-																						}),
-																					_1: {ctor: '[]'}
-																				}
-																			}),
-																		_1: {ctor: '[]'}
-																	}),
-																_1: {ctor: '[]'}
-															}
-														}
-													}
-												}),
-											_1: {ctor: '[]'}
-										}
-									}),
-								_1: {ctor: '[]'}
-							}),
-						_1: {
-							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$footer,
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$class('card-footer'),
-									_1: {ctor: '[]'}
-								},
-								{
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$a,
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$href(exchangeUrl),
-											_1: {
-												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$target('_blank'),
-												_1: {
-													ctor: '::',
-													_0: _elm_lang$html$Html_Attributes$class('card-footer-item'),
-													_1: {ctor: '[]'}
-												}
-											}
-										},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text('Exchange'),
-											_1: {ctor: '[]'}
-										}),
-									_1: {
-										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$a,
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$href(coinigyUrl),
-												_1: {
-													ctor: '::',
-													_0: _elm_lang$html$Html_Attributes$target('_blank'),
-													_1: {
-														ctor: '::',
-														_0: _elm_lang$html$Html_Attributes$class('card-footer-item'),
-														_1: {ctor: '[]'}
-													}
-												}
-											},
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html$text('Coinigy'),
-												_1: {ctor: '[]'}
-											}),
-										_1: {
-											ctor: '::',
-											_0: A2(
-												_elm_lang$html$Html$a,
-												{
-													ctor: '::',
-													_0: _elm_lang$html$Html_Attributes$href(cryptoCompare),
-													_1: {
-														ctor: '::',
-														_0: _elm_lang$html$Html_Attributes$target('_blank'),
-														_1: {
-															ctor: '::',
-															_0: _elm_lang$html$Html_Attributes$class('card-footer-item'),
-															_1: {ctor: '[]'}
-														}
-													}
-												},
-												{
-													ctor: '::',
-													_0: _elm_lang$html$Html$text('CryptoCompare'),
-													_1: {ctor: '[]'}
-												}),
-											_1: {ctor: '[]'}
-										}
-									}
-								}),
-							_1: {ctor: '[]'}
-						}
-					}
-				}),
-			_1: {ctor: '[]'}
-		});
-};
 var _user$project$Main$message = F2(
 	function (txt, messageType) {
 		var messageClass = function () {
-			var _p1 = messageType;
-			if (_p1.ctor === 'Success') {
+			var _p0 = messageType;
+			if (_p0.ctor === 'Success') {
 				return 'is-success';
 			} else {
 				return 'is-danger';
@@ -15695,8 +15156,8 @@ var _user$project$Main$message = F2(
 var _user$project$Main$notification = F3(
 	function (txt, notifType, closeMsg) {
 		var closeButton = function () {
-			var _p2 = closeMsg;
-			if (_p2.ctor === 'Just') {
+			var _p1 = closeMsg;
+			if (_p1.ctor === 'Just') {
 				return A2(
 					_elm_lang$html$Html$button,
 					{
@@ -15704,7 +15165,7 @@ var _user$project$Main$notification = F3(
 						_0: _elm_lang$html$Html_Attributes$class('delete'),
 						_1: {
 							ctor: '::',
-							_0: _elm_lang$html$Html_Events$onClick(_p2._0),
+							_0: _elm_lang$html$Html_Events$onClick(_p1._0),
 							_1: {ctor: '[]'}
 						}
 					},
@@ -15718,8 +15179,8 @@ var _user$project$Main$notification = F3(
 			}
 		}();
 		var notifClass = function () {
-			var _p3 = notifType;
-			if (_p3.ctor === 'Success') {
+			var _p2 = notifType;
+			if (_p2.ctor === 'Success') {
 				return 'is-success';
 			} else {
 				return 'is-danger';
@@ -15784,14 +15245,42 @@ var _user$project$Main$modalCard = F6(
 	function (model, title, close, body, ok, cancel) {
 		var loadingClass = model.isLoading ? ' is-loading' : '';
 		var okButton = function () {
-			var _p4 = ok;
-			if (_p4.ctor === 'Just') {
+			var _p3 = ok;
+			if (_p3.ctor === 'Just') {
 				return A2(
 					_elm_lang$html$Html$button,
 					{
 						ctor: '::',
 						_0: _elm_lang$html$Html_Attributes$class(
 							A2(_elm_lang$core$Basics_ops['++'], 'button is-success', loadingClass)),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Events$onClick(_p3._0._1),
+							_1: {
+								ctor: '::',
+								_0: _user$project$Main$disabledAttribute(model.isLoading),
+								_1: {ctor: '[]'}
+							}
+						}
+					},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(_p3._0._0),
+						_1: {ctor: '[]'}
+					});
+			} else {
+				return _elm_lang$html$Html$text('');
+			}
+		}();
+		var cancelButton = function () {
+			var _p4 = cancel;
+			if (_p4.ctor === 'Just') {
+				return A2(
+					_elm_lang$html$Html$button,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class(
+							A2(_elm_lang$core$Basics_ops['++'], 'button is-light', loadingClass)),
 						_1: {
 							ctor: '::',
 							_0: _elm_lang$html$Html_Events$onClick(_p4._0._1),
@@ -15805,34 +15294,6 @@ var _user$project$Main$modalCard = F6(
 					{
 						ctor: '::',
 						_0: _elm_lang$html$Html$text(_p4._0._0),
-						_1: {ctor: '[]'}
-					});
-			} else {
-				return _elm_lang$html$Html$text('');
-			}
-		}();
-		var cancelButton = function () {
-			var _p5 = cancel;
-			if (_p5.ctor === 'Just') {
-				return A2(
-					_elm_lang$html$Html$button,
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$class(
-							A2(_elm_lang$core$Basics_ops['++'], 'button is-light', loadingClass)),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$html$Html_Events$onClick(_p5._0._1),
-							_1: {
-								ctor: '::',
-								_0: _user$project$Main$disabledAttribute(model.isLoading),
-								_1: {ctor: '[]'}
-							}
-						}
-					},
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html$text(_p5._0._0),
 						_1: {ctor: '[]'}
 					});
 			} else {
@@ -16024,18 +15485,18 @@ var _user$project$Main$selectInput = F6(
 		var loadingClass = model.isLoading ? ' is-loading' : '';
 		var options = A2(
 			_elm_lang$core$List$map,
-			function (_p6) {
-				var _p7 = _p6;
+			function (_p5) {
+				var _p6 = _p5;
 				return A2(
 					_elm_lang$html$Html$option,
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$value(_p7._0),
+						_0: _elm_lang$html$Html_Attributes$value(_p6._0),
 						_1: {ctor: '[]'}
 					},
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(_p7._1),
+						_0: _elm_lang$html$Html$text(_p6._1),
 						_1: {ctor: '[]'}
 					});
 			},
@@ -16109,24 +15570,24 @@ var _user$project$Main$selectInput = F6(
 var _user$project$Main$handleResponseErrors = F3(
 	function (model, err, msg) {
 		var error = function () {
-			var _p8 = err;
-			switch (_p8.ctor) {
+			var _p7 = err;
+			switch (_p7.ctor) {
 				case 'BadStatus':
-					var _p9 = _p8._0;
+					var _p8 = _p7._0;
 					return A2(
 						_elm_lang$core$Basics_ops['++'],
-						_elm_lang$core$Basics$toString(_p9.status.code),
+						_elm_lang$core$Basics$toString(_p8.status.code),
 						A2(
 							_elm_lang$core$Basics_ops['++'],
 							' - ',
-							_elm_lang$core$Basics$toString(_p9.body)));
+							_elm_lang$core$Basics$toString(_p8.body)));
 				case 'BadPayload':
-					return _p8._0;
+					return _p7._0;
 				default:
 					return 'Fail to get Coinigy Exchanges list';
 			}
 		}();
-		var _p10 = A2(_elm_lang$core$Debug$log, msg, err);
+		var _p9 = A2(_elm_lang$core$Debug$log, msg, err);
 		return {
 			ctor: '_Tuple2',
 			_0: _elm_lang$core$Native_Utils.update(
@@ -16139,8 +15600,8 @@ var _user$project$Main$handleResponseErrors = F3(
 		};
 	});
 var _user$project$Main$periodToString = function (period) {
-	var _p11 = period;
-	switch (_p11.ctor) {
+	var _p10 = period;
+	switch (_p10.ctor) {
 		case 'Period3m':
 			return '3m';
 		case 'Period5m':
@@ -16153,6 +15614,702 @@ var _user$project$Main$periodToString = function (period) {
 			return '30m';
 	}
 };
+var _user$project$Main$coinCard = F2(
+	function (coin, filter) {
+		var _p11 = (_elm_lang$core$Native_Utils.cmp(coin.percentage, 0) < 0) ? {
+			ctor: '_Tuple2',
+			_0: 'has-text-danger',
+			_1: A2(
+				_elm_lang$html$Html$span,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('icon'),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$i,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('fa fa-caret-down'),
+							_1: {ctor: '[]'}
+						},
+						{ctor: '[]'}),
+					_1: {ctor: '[]'}
+				})
+		} : {
+			ctor: '_Tuple2',
+			_0: 'has-text-success',
+			_1: A2(
+				_elm_lang$html$Html$span,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('icon'),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$i,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('fa fa-caret-up'),
+							_1: {ctor: '[]'}
+						},
+						{ctor: '[]'}),
+					_1: {ctor: '[]'}
+				})
+		};
+		var titleColor = _p11._0;
+		var percentIcon = _p11._1;
+		var cryptoCompare = A2(
+			_elm_lang$core$Basics_ops['++'],
+			'https://www.cryptocompare.com/coins/',
+			A2(_elm_lang$core$Basics_ops['++'], coin.base, '/forum'));
+		var coinigyUrl = A2(
+			_elm_lang$core$Basics_ops['++'],
+			'https://www.coinigy.com/main/markets/',
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				coin.exchange,
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					'/',
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						coin.base,
+						A2(_elm_lang$core$Basics_ops['++'], '/', coin.quote)))));
+		var exchangeUrl = function () {
+			var _p12 = coin.exchange;
+			switch (_p12) {
+				case 'BINA':
+					return A2(
+						_elm_lang$core$Basics_ops['++'],
+						'https://www.binance.com/trade.html?symbol=',
+						A2(
+							_elm_lang$core$String$join,
+							'_',
+							A2(_elm_lang$core$String$split, '/', coin.market)));
+				case 'HITB':
+					return A2(
+						_elm_lang$core$Basics_ops['++'],
+						'https://www.hitbtc.com/exchange/',
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							coin.base,
+							A2(_elm_lang$core$Basics_ops['++'], '-to-', coin.quote)));
+				case 'PLNX':
+					return A2(
+						_elm_lang$core$Basics_ops['++'],
+						'https://poloniex.com/exchange#',
+						A2(
+							_elm_lang$core$String$join,
+							'_',
+							A2(_elm_lang$core$String$split, '/', coin.market)));
+				case 'LIQU':
+					return A2(
+						_elm_lang$core$Basics_ops['++'],
+						'https://liqui.io/#/exchange/',
+						A2(
+							_elm_lang$core$String$join,
+							'_',
+							A2(_elm_lang$core$String$split, '/', coin.market)));
+				default:
+					return '#';
+			}
+		}();
+		var percentage = A2(
+			_elm_lang$core$Basics_ops['++'],
+			_elm_lang$core$Basics$toString(coin.percentage),
+			'% ');
+		var exchangeName = A2(_elm_lang$core$Basics_ops['++'], '@ ', coin.exchange);
+		var pairName = A2(
+			_elm_lang$core$Basics_ops['++'],
+			coin.base,
+			A2(_elm_lang$core$Basics_ops['++'], '/', coin.quote));
+		return A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('column coin-column'),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('card'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('card-content'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$div,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class('content'),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$nav,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$class('level'),
+												_1: {ctor: '[]'}
+											},
+											{
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$div,
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$class('level-left'),
+														_1: {ctor: '[]'}
+													},
+													{
+														ctor: '::',
+														_0: A2(
+															_elm_lang$html$Html$div,
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html_Attributes$class('level-item'),
+																_1: {ctor: '[]'}
+															},
+															{
+																ctor: '::',
+																_0: A2(
+																	_elm_lang$html$Html$h3,
+																	{
+																		ctor: '::',
+																		_0: _elm_lang$html$Html_Attributes$class(
+																			A2(_elm_lang$core$Basics_ops['++'], 'title is-3 ', titleColor)),
+																		_1: {ctor: '[]'}
+																	},
+																	{
+																		ctor: '::',
+																		_0: _elm_lang$html$Html$text(percentage),
+																		_1: {
+																			ctor: '::',
+																			_0: percentIcon,
+																			_1: {ctor: '[]'}
+																		}
+																	}),
+																_1: {ctor: '[]'}
+															}),
+														_1: {
+															ctor: '::',
+															_0: A2(
+																_elm_lang$html$Html$div,
+																{
+																	ctor: '::',
+																	_0: _elm_lang$html$Html_Attributes$class('level-item'),
+																	_1: {ctor: '[]'}
+																},
+																{
+																	ctor: '::',
+																	_0: A2(
+																		_elm_lang$html$Html$strong,
+																		{ctor: '[]'},
+																		{
+																			ctor: '::',
+																			_0: _elm_lang$html$Html$text(pairName),
+																			_1: {ctor: '[]'}
+																		}),
+																	_1: {ctor: '[]'}
+																}),
+															_1: {
+																ctor: '::',
+																_0: A2(
+																	_elm_lang$html$Html$div,
+																	{
+																		ctor: '::',
+																		_0: _elm_lang$html$Html_Attributes$class('level-item'),
+																		_1: {ctor: '[]'}
+																	},
+																	{
+																		ctor: '::',
+																		_0: A2(
+																			_elm_lang$html$Html$small,
+																			{ctor: '[]'},
+																			{
+																				ctor: '::',
+																				_0: _elm_lang$html$Html$text(exchangeName),
+																				_1: {ctor: '[]'}
+																			}),
+																		_1: {ctor: '[]'}
+																	}),
+																_1: {ctor: '[]'}
+															}
+														}
+													}),
+												_1: {
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$div,
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html_Attributes$class('level-right'),
+															_1: {ctor: '[]'}
+														},
+														{
+															ctor: '::',
+															_0: A2(
+																_elm_lang$html$Html$div,
+																{
+																	ctor: '::',
+																	_0: _elm_lang$html$Html_Attributes$class('level-item'),
+																	_1: {ctor: '[]'}
+																},
+																{
+																	ctor: '::',
+																	_0: A2(
+																		_elm_lang$html$Html$small,
+																		{
+																			ctor: '::',
+																			_0: _elm_lang$html$Html_Attributes$class('is-pulled-right'),
+																			_1: {ctor: '[]'}
+																		},
+																		{
+																			ctor: '::',
+																			_0: _elm_lang$html$Html$text('36s'),
+																			_1: {ctor: '[]'}
+																		}),
+																	_1: {ctor: '[]'}
+																}),
+															_1: {ctor: '[]'}
+														}),
+													_1: {ctor: '[]'}
+												}
+											}),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$nav,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$class('level'),
+													_1: {ctor: '[]'}
+												},
+												{
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$div,
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html_Attributes$class('level-item has-text-centered'),
+															_1: {ctor: '[]'}
+														},
+														{
+															ctor: '::',
+															_0: A2(
+																_elm_lang$html$Html$div,
+																{ctor: '[]'},
+																{
+																	ctor: '::',
+																	_0: A2(
+																		_elm_lang$html$Html$p,
+																		{
+																			ctor: '::',
+																			_0: _elm_lang$html$Html_Attributes$class('heading'),
+																			_1: {ctor: '[]'}
+																		},
+																		{
+																			ctor: '::',
+																			_0: _elm_lang$html$Html$text('From'),
+																			_1: {ctor: '[]'}
+																		}),
+																	_1: {
+																		ctor: '::',
+																		_0: A2(
+																			_elm_lang$html$Html$p,
+																			{
+																				ctor: '::',
+																				_0: _elm_lang$html$Html_Attributes$class('title is-5'),
+																				_1: {ctor: '[]'}
+																			},
+																			{
+																				ctor: '::',
+																				_0: _elm_lang$html$Html$text(
+																					_elm_lang$core$Basics$toString(coin.from)),
+																				_1: {ctor: '[]'}
+																			}),
+																		_1: {ctor: '[]'}
+																	}
+																}),
+															_1: {ctor: '[]'}
+														}),
+													_1: {
+														ctor: '::',
+														_0: A2(
+															_elm_lang$html$Html$div,
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html_Attributes$class('level-item has-text-centered'),
+																_1: {ctor: '[]'}
+															},
+															{
+																ctor: '::',
+																_0: A2(
+																	_elm_lang$html$Html$div,
+																	{ctor: '[]'},
+																	{
+																		ctor: '::',
+																		_0: A2(
+																			_elm_lang$html$Html$p,
+																			{
+																				ctor: '::',
+																				_0: _elm_lang$html$Html_Attributes$class('heading'),
+																				_1: {ctor: '[]'}
+																			},
+																			{
+																				ctor: '::',
+																				_0: _elm_lang$html$Html$text('To'),
+																				_1: {ctor: '[]'}
+																			}),
+																		_1: {
+																			ctor: '::',
+																			_0: A2(
+																				_elm_lang$html$Html$p,
+																				{
+																					ctor: '::',
+																					_0: _elm_lang$html$Html_Attributes$class('title is-5'),
+																					_1: {ctor: '[]'}
+																				},
+																				{
+																					ctor: '::',
+																					_0: _elm_lang$html$Html$text(
+																						_elm_lang$core$Basics$toString(coin.to)),
+																					_1: {ctor: '[]'}
+																				}),
+																			_1: {ctor: '[]'}
+																		}
+																	}),
+																_1: {ctor: '[]'}
+															}),
+														_1: {
+															ctor: '::',
+															_0: A2(
+																_elm_lang$html$Html$div,
+																{
+																	ctor: '::',
+																	_0: _elm_lang$html$Html_Attributes$class('level-item has-text-centered'),
+																	_1: {ctor: '[]'}
+																},
+																{
+																	ctor: '::',
+																	_0: A2(
+																		_elm_lang$html$Html$div,
+																		{ctor: '[]'},
+																		{
+																			ctor: '::',
+																			_0: A2(
+																				_elm_lang$html$Html$p,
+																				{
+																					ctor: '::',
+																					_0: _elm_lang$html$Html_Attributes$class('heading'),
+																					_1: {ctor: '[]'}
+																				},
+																				{
+																					ctor: '::',
+																					_0: _elm_lang$html$Html$text('Last Price'),
+																					_1: {ctor: '[]'}
+																				}),
+																			_1: {
+																				ctor: '::',
+																				_0: A2(
+																					_elm_lang$html$Html$p,
+																					{
+																						ctor: '::',
+																						_0: _elm_lang$html$Html_Attributes$class('title is-5'),
+																						_1: {ctor: '[]'}
+																					},
+																					{
+																						ctor: '::',
+																						_0: _elm_lang$html$Html$text(
+																							_elm_lang$core$Basics$toString(coin.lastPrice)),
+																						_1: {ctor: '[]'}
+																					}),
+																				_1: {ctor: '[]'}
+																			}
+																		}),
+																	_1: {ctor: '[]'}
+																}),
+															_1: {ctor: '[]'}
+														}
+													}
+												}),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$nav,
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$class('level'),
+														_1: {ctor: '[]'}
+													},
+													{
+														ctor: '::',
+														_0: A2(
+															_elm_lang$html$Html$div,
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html_Attributes$class('level-item has-text-centered'),
+																_1: {ctor: '[]'}
+															},
+															{
+																ctor: '::',
+																_0: A2(
+																	_elm_lang$html$Html$div,
+																	{ctor: '[]'},
+																	{
+																		ctor: '::',
+																		_0: A2(
+																			_elm_lang$html$Html$p,
+																			{
+																				ctor: '::',
+																				_0: _elm_lang$html$Html_Attributes$class('heading'),
+																				_1: {ctor: '[]'}
+																			},
+																			{
+																				ctor: '::',
+																				_0: _elm_lang$html$Html$text('Bid'),
+																				_1: {ctor: '[]'}
+																			}),
+																		_1: {
+																			ctor: '::',
+																			_0: A2(
+																				_elm_lang$html$Html$p,
+																				{
+																					ctor: '::',
+																					_0: _elm_lang$html$Html_Attributes$class('title is-5'),
+																					_1: {ctor: '[]'}
+																				},
+																				{
+																					ctor: '::',
+																					_0: _elm_lang$html$Html$text(
+																						_elm_lang$core$Basics$toString(coin.bidPrice)),
+																					_1: {ctor: '[]'}
+																				}),
+																			_1: {ctor: '[]'}
+																		}
+																	}),
+																_1: {ctor: '[]'}
+															}),
+														_1: {
+															ctor: '::',
+															_0: A2(
+																_elm_lang$html$Html$div,
+																{
+																	ctor: '::',
+																	_0: _elm_lang$html$Html_Attributes$class('level-item has-text-centered'),
+																	_1: {ctor: '[]'}
+																},
+																{
+																	ctor: '::',
+																	_0: A2(
+																		_elm_lang$html$Html$div,
+																		{ctor: '[]'},
+																		{
+																			ctor: '::',
+																			_0: A2(
+																				_elm_lang$html$Html$p,
+																				{
+																					ctor: '::',
+																					_0: _elm_lang$html$Html_Attributes$class('heading'),
+																					_1: {ctor: '[]'}
+																				},
+																				{
+																					ctor: '::',
+																					_0: _elm_lang$html$Html$text('Ask'),
+																					_1: {ctor: '[]'}
+																				}),
+																			_1: {
+																				ctor: '::',
+																				_0: A2(
+																					_elm_lang$html$Html$p,
+																					{
+																						ctor: '::',
+																						_0: _elm_lang$html$Html_Attributes$class('title is-5'),
+																						_1: {ctor: '[]'}
+																					},
+																					{
+																						ctor: '::',
+																						_0: _elm_lang$html$Html$text(
+																							_elm_lang$core$Basics$toString(coin.askPrice)),
+																						_1: {ctor: '[]'}
+																					}),
+																				_1: {ctor: '[]'}
+																			}
+																		}),
+																	_1: {ctor: '[]'}
+																}),
+															_1: {
+																ctor: '::',
+																_0: A2(
+																	_elm_lang$html$Html$div,
+																	{
+																		ctor: '::',
+																		_0: _elm_lang$html$Html_Attributes$class('level-item has-text-centered'),
+																		_1: {ctor: '[]'}
+																	},
+																	{
+																		ctor: '::',
+																		_0: A2(
+																			_elm_lang$html$Html$div,
+																			{ctor: '[]'},
+																			{
+																				ctor: '::',
+																				_0: A2(
+																					_elm_lang$html$Html$p,
+																					{
+																						ctor: '::',
+																						_0: _elm_lang$html$Html_Attributes$class('heading'),
+																						_1: {ctor: '[]'}
+																					},
+																					{
+																						ctor: '::',
+																						_0: _elm_lang$html$Html$text(
+																							A2(
+																								_elm_lang$core$Basics_ops['++'],
+																								coin.quote,
+																								A2(
+																									_elm_lang$core$Basics_ops['++'],
+																									' Volume (',
+																									A2(
+																										_elm_lang$core$Basics_ops['++'],
+																										_user$project$Main$periodToString(filter.period),
+																										')')))),
+																						_1: {ctor: '[]'}
+																					}),
+																				_1: {
+																					ctor: '::',
+																					_0: A2(
+																						_elm_lang$html$Html$p,
+																						{
+																							ctor: '::',
+																							_0: _elm_lang$html$Html_Attributes$class('title is-5'),
+																							_1: {ctor: '[]'}
+																						},
+																						{
+																							ctor: '::',
+																							_0: _elm_lang$html$Html$text(
+																								A2(_cuducos$elm_format_number$FormatNumber$format, _cuducos$elm_format_number$FormatNumber_Locales$usLocale, coin.volume)),
+																							_1: {ctor: '[]'}
+																						}),
+																					_1: {ctor: '[]'}
+																				}
+																			}),
+																		_1: {ctor: '[]'}
+																	}),
+																_1: {ctor: '[]'}
+															}
+														}
+													}),
+												_1: {ctor: '[]'}
+											}
+										}
+									}),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$footer,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('card-footer'),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$a,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$href(exchangeUrl),
+											_1: {
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$target('_blank'),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$class('card-footer-item'),
+													_1: {ctor: '[]'}
+												}
+											}
+										},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('Exchange'),
+											_1: {ctor: '[]'}
+										}),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$a,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$href(coinigyUrl),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$target('_blank'),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$class('card-footer-item'),
+														_1: {ctor: '[]'}
+													}
+												}
+											},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('Coinigy'),
+												_1: {ctor: '[]'}
+											}),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$a,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$href(cryptoCompare),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$target('_blank'),
+														_1: {
+															ctor: '::',
+															_0: _elm_lang$html$Html_Attributes$class('card-footer-item'),
+															_1: {ctor: '[]'}
+														}
+													}
+												},
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html$text('CryptoCompare'),
+													_1: {ctor: '[]'}
+												}),
+											_1: {ctor: '[]'}
+										}
+									}
+								}),
+							_1: {ctor: '[]'}
+						}
+					}),
+				_1: {ctor: '[]'}
+			});
+	});
 var _user$project$Main$watchListContent = function (model) {
 	return A2(
 		_elm_lang$html$Html$table,
@@ -16267,8 +16424,8 @@ var _user$project$Main$watchListContent = function (model) {
 						_elm_lang$core$List$map,
 						function (item) {
 							var percentage = function () {
-								var _p12 = model.filter.period;
-								switch (_p12.ctor) {
+								var _p13 = model.filter.period;
+								switch (_p13.ctor) {
 									case 'Period3m':
 										return A2(
 											_elm_lang$core$Maybe$withDefault,
@@ -16418,16 +16575,16 @@ var _user$project$Main$watchListContent = function (model) {
 							_elm_lang$core$List$sortWith,
 							F2(
 								function (a, b) {
-									var _p13 = A2(_elm_lang$core$Basics$compare, a.exchange, b.exchange);
-									if (_p13.ctor === 'EQ') {
-										var _p14 = A2(_elm_lang$core$Basics$compare, a.quote, b.quote);
-										if (_p14.ctor === 'EQ') {
+									var _p14 = A2(_elm_lang$core$Basics$compare, a.exchange, b.exchange);
+									if (_p14.ctor === 'EQ') {
+										var _p15 = A2(_elm_lang$core$Basics$compare, a.quote, b.quote);
+										if (_p15.ctor === 'EQ') {
 											return A2(_elm_lang$core$Basics$compare, a.base, b.base);
 										} else {
-											return _p14;
+											return _p15;
 										}
 									} else {
-										return _p13;
+										return _p14;
 									}
 								}),
 							model.watchMarkets))),
@@ -16498,6 +16655,7 @@ var _user$project$Main$startSockets = _elm_lang$core$Native_Platform.outgoingPor
 						market: v.market,
 						from: v.from,
 						to: v.to,
+						lastPrice: v.lastPrice,
 						volume: v.volume,
 						btcVolume: v.btcVolume,
 						bidPrice: v.bidPrice,
@@ -16549,43 +16707,84 @@ var _user$project$Main$newAlert = _elm_lang$core$Native_Platform.incomingPort(
 															function (to) {
 																return A2(
 																	_elm_lang$core$Json_Decode$andThen,
-																	function (volume) {
+																	function (lastPrice) {
 																		return A2(
 																			_elm_lang$core$Json_Decode$andThen,
-																			function (btcVolume) {
+																			function (volume) {
 																				return A2(
 																					_elm_lang$core$Json_Decode$andThen,
-																					function (bidPrice) {
+																					function (btcVolume) {
 																						return A2(
 																							_elm_lang$core$Json_Decode$andThen,
-																							function (askPrice) {
+																							function (bidPrice) {
 																								return A2(
 																									_elm_lang$core$Json_Decode$andThen,
-																									function (percentage) {
+																									function (askPrice) {
 																										return A2(
 																											_elm_lang$core$Json_Decode$andThen,
-																											function (time) {
+																											function (percentage) {
 																												return A2(
 																													_elm_lang$core$Json_Decode$andThen,
-																													function (period3m) {
+																													function (time) {
 																														return A2(
 																															_elm_lang$core$Json_Decode$andThen,
-																															function (period5m) {
+																															function (period3m) {
 																																return A2(
 																																	_elm_lang$core$Json_Decode$andThen,
-																																	function (period10m) {
+																																	function (period5m) {
 																																		return A2(
 																																			_elm_lang$core$Json_Decode$andThen,
-																																			function (period15m) {
+																																			function (period10m) {
 																																				return A2(
 																																					_elm_lang$core$Json_Decode$andThen,
-																																					function (period30m) {
-																																						return _elm_lang$core$Json_Decode$succeed(
-																																							{exchange: exchange, marketId: marketId, base: base, quote: quote, market: market, from: from, to: to, volume: volume, btcVolume: btcVolume, bidPrice: bidPrice, askPrice: askPrice, percentage: percentage, time: time, period3m: period3m, period5m: period5m, period10m: period10m, period15m: period15m, period30m: period30m});
+																																					function (period15m) {
+																																						return A2(
+																																							_elm_lang$core$Json_Decode$andThen,
+																																							function (period30m) {
+																																								return _elm_lang$core$Json_Decode$succeed(
+																																									{exchange: exchange, marketId: marketId, base: base, quote: quote, market: market, from: from, to: to, lastPrice: lastPrice, volume: volume, btcVolume: btcVolume, bidPrice: bidPrice, askPrice: askPrice, percentage: percentage, time: time, period3m: period3m, period5m: period5m, period10m: period10m, period15m: period15m, period30m: period30m});
+																																							},
+																																							A2(
+																																								_elm_lang$core$Json_Decode$field,
+																																								'period30m',
+																																								_elm_lang$core$Json_Decode$oneOf(
+																																									{
+																																										ctor: '::',
+																																										_0: _elm_lang$core$Json_Decode$null(_elm_lang$core$Maybe$Nothing),
+																																										_1: {
+																																											ctor: '::',
+																																											_0: A2(
+																																												_elm_lang$core$Json_Decode$map,
+																																												_elm_lang$core$Maybe$Just,
+																																												A2(
+																																													_elm_lang$core$Json_Decode$andThen,
+																																													function (min) {
+																																														return A2(
+																																															_elm_lang$core$Json_Decode$andThen,
+																																															function (max) {
+																																																return A2(
+																																																	_elm_lang$core$Json_Decode$andThen,
+																																																	function (diff) {
+																																																		return A2(
+																																																			_elm_lang$core$Json_Decode$andThen,
+																																																			function (percentage) {
+																																																				return _elm_lang$core$Json_Decode$succeed(
+																																																					{min: min, max: max, diff: diff, percentage: percentage});
+																																																			},
+																																																			A2(_elm_lang$core$Json_Decode$field, 'percentage', _elm_lang$core$Json_Decode$float));
+																																																	},
+																																																	A2(_elm_lang$core$Json_Decode$field, 'diff', _elm_lang$core$Json_Decode$float));
+																																															},
+																																															A2(_elm_lang$core$Json_Decode$field, 'max', _elm_lang$core$Json_Decode$float));
+																																													},
+																																													A2(_elm_lang$core$Json_Decode$field, 'min', _elm_lang$core$Json_Decode$float))),
+																																											_1: {ctor: '[]'}
+																																										}
+																																									})));
 																																					},
 																																					A2(
 																																						_elm_lang$core$Json_Decode$field,
-																																						'period30m',
+																																						'period15m',
 																																						_elm_lang$core$Json_Decode$oneOf(
 																																							{
 																																								ctor: '::',
@@ -16623,7 +16822,7 @@ var _user$project$Main$newAlert = _elm_lang$core$Native_Platform.incomingPort(
 																																			},
 																																			A2(
 																																				_elm_lang$core$Json_Decode$field,
-																																				'period15m',
+																																				'period10m',
 																																				_elm_lang$core$Json_Decode$oneOf(
 																																					{
 																																						ctor: '::',
@@ -16661,7 +16860,7 @@ var _user$project$Main$newAlert = _elm_lang$core$Native_Platform.incomingPort(
 																																	},
 																																	A2(
 																																		_elm_lang$core$Json_Decode$field,
-																																		'period10m',
+																																		'period5m',
 																																		_elm_lang$core$Json_Decode$oneOf(
 																																			{
 																																				ctor: '::',
@@ -16699,7 +16898,7 @@ var _user$project$Main$newAlert = _elm_lang$core$Native_Platform.incomingPort(
 																															},
 																															A2(
 																																_elm_lang$core$Json_Decode$field,
-																																'period5m',
+																																'period3m',
 																																_elm_lang$core$Json_Decode$oneOf(
 																																	{
 																																		ctor: '::',
@@ -16735,55 +16934,19 @@ var _user$project$Main$newAlert = _elm_lang$core$Native_Platform.incomingPort(
 																																		}
 																																	})));
 																													},
-																													A2(
-																														_elm_lang$core$Json_Decode$field,
-																														'period3m',
-																														_elm_lang$core$Json_Decode$oneOf(
-																															{
-																																ctor: '::',
-																																_0: _elm_lang$core$Json_Decode$null(_elm_lang$core$Maybe$Nothing),
-																																_1: {
-																																	ctor: '::',
-																																	_0: A2(
-																																		_elm_lang$core$Json_Decode$map,
-																																		_elm_lang$core$Maybe$Just,
-																																		A2(
-																																			_elm_lang$core$Json_Decode$andThen,
-																																			function (min) {
-																																				return A2(
-																																					_elm_lang$core$Json_Decode$andThen,
-																																					function (max) {
-																																						return A2(
-																																							_elm_lang$core$Json_Decode$andThen,
-																																							function (diff) {
-																																								return A2(
-																																									_elm_lang$core$Json_Decode$andThen,
-																																									function (percentage) {
-																																										return _elm_lang$core$Json_Decode$succeed(
-																																											{min: min, max: max, diff: diff, percentage: percentage});
-																																									},
-																																									A2(_elm_lang$core$Json_Decode$field, 'percentage', _elm_lang$core$Json_Decode$float));
-																																							},
-																																							A2(_elm_lang$core$Json_Decode$field, 'diff', _elm_lang$core$Json_Decode$float));
-																																					},
-																																					A2(_elm_lang$core$Json_Decode$field, 'max', _elm_lang$core$Json_Decode$float));
-																																			},
-																																			A2(_elm_lang$core$Json_Decode$field, 'min', _elm_lang$core$Json_Decode$float))),
-																																	_1: {ctor: '[]'}
-																																}
-																															})));
+																													A2(_elm_lang$core$Json_Decode$field, 'time', _elm_lang$core$Json_Decode$string));
 																											},
-																											A2(_elm_lang$core$Json_Decode$field, 'time', _elm_lang$core$Json_Decode$string));
+																											A2(_elm_lang$core$Json_Decode$field, 'percentage', _elm_lang$core$Json_Decode$float));
 																									},
-																									A2(_elm_lang$core$Json_Decode$field, 'percentage', _elm_lang$core$Json_Decode$float));
+																									A2(_elm_lang$core$Json_Decode$field, 'askPrice', _elm_lang$core$Json_Decode$float));
 																							},
-																							A2(_elm_lang$core$Json_Decode$field, 'askPrice', _elm_lang$core$Json_Decode$float));
+																							A2(_elm_lang$core$Json_Decode$field, 'bidPrice', _elm_lang$core$Json_Decode$float));
 																					},
-																					A2(_elm_lang$core$Json_Decode$field, 'bidPrice', _elm_lang$core$Json_Decode$float));
+																					A2(_elm_lang$core$Json_Decode$field, 'btcVolume', _elm_lang$core$Json_Decode$float));
 																			},
-																			A2(_elm_lang$core$Json_Decode$field, 'btcVolume', _elm_lang$core$Json_Decode$float));
+																			A2(_elm_lang$core$Json_Decode$field, 'volume', _elm_lang$core$Json_Decode$float));
 																	},
-																	A2(_elm_lang$core$Json_Decode$field, 'volume', _elm_lang$core$Json_Decode$float));
+																	A2(_elm_lang$core$Json_Decode$field, 'lastPrice', _elm_lang$core$Json_Decode$float));
 															},
 															A2(_elm_lang$core$Json_Decode$field, 'to', _elm_lang$core$Json_Decode$float));
 													},
@@ -16926,7 +17089,9 @@ var _user$project$Main$Coin = function (a) {
 															return function (p) {
 																return function (q) {
 																	return function (r) {
-																		return {exchange: a, marketId: b, base: c, quote: d, market: e, from: f, to: g, volume: h, btcVolume: i, bidPrice: j, askPrice: k, percentage: l, time: m, period3m: n, period5m: o, period10m: p, period15m: q, period30m: r};
+																		return function (s) {
+																			return {exchange: a, marketId: b, base: c, quote: d, market: e, from: f, to: g, lastPrice: h, volume: i, btcVolume: j, bidPrice: k, askPrice: l, percentage: m, time: n, period3m: o, period5m: p, period10m: q, period15m: r, period30m: s};
+																		};
 																	};
 																};
 															};
@@ -16948,16 +17113,16 @@ var _user$project$Main$Coin = function (a) {
 var _user$project$Main$watchListCoinDecoder = function () {
 	var toDecoder = F8(
 		function (exchangeCode, exchangeId, market, from, to, volume, btcVolume, serverTime) {
-			var _p15 = function () {
-				var _p16 = A2(_elm_lang$core$String$split, '/', market);
-				if (((_p16.ctor === '::') && (_p16._1.ctor === '::')) && (_p16._1._1.ctor === '[]')) {
-					return {ctor: '_Tuple2', _0: _p16._0, _1: _p16._1._0};
+			var _p16 = function () {
+				var _p17 = A2(_elm_lang$core$String$split, '/', market);
+				if (((_p17.ctor === '::') && (_p17._1.ctor === '::')) && (_p17._1._1.ctor === '[]')) {
+					return {ctor: '_Tuple2', _0: _p17._0, _1: _p17._1._0};
 				} else {
 					return {ctor: '_Tuple2', _0: '', _1: ''};
 				}
 			}();
-			var base = _p15._0;
-			var quote = _p15._1;
+			var base = _p16._0;
+			var quote = _p16._1;
 			return _elm_lang$core$Json_Decode$succeed(
 				_user$project$Main$Coin(exchangeCode)(exchangeId)(base)(quote)(market)(
 					A2(
@@ -16975,7 +17140,7 @@ var _user$project$Main$watchListCoinDecoder = function () {
 					A2(
 						_elm_lang$core$Result$withDefault,
 						0.0,
-						_elm_lang$core$String$toFloat(btcVolume)))(0.0)(0.0)(0.0)(serverTime)(_elm_lang$core$Maybe$Nothing)(_elm_lang$core$Maybe$Nothing)(_elm_lang$core$Maybe$Nothing)(_elm_lang$core$Maybe$Nothing)(_elm_lang$core$Maybe$Nothing));
+						_elm_lang$core$String$toFloat(btcVolume)))(0.0)(0.0)(0.0)(0.0)(serverTime)(_elm_lang$core$Maybe$Nothing)(_elm_lang$core$Maybe$Nothing)(_elm_lang$core$Maybe$Nothing)(_elm_lang$core$Maybe$Nothing)(_elm_lang$core$Maybe$Nothing));
 		});
 	return A2(
 		_elm_lang$core$Json_Decode$field,
@@ -17026,9 +17191,9 @@ var _user$project$Main$calcPercentages = F2(
 			_elm_lang$core$List$map,
 			function (coin) {
 				var currentDate = function () {
-					var _p17 = _elm_lang$core$Date$fromString(coin.time);
-					if (_p17.ctor === 'Ok') {
-						return _elm_lang$core$Date$toTime(_p17._0);
+					var _p18 = _elm_lang$core$Date$fromString(coin.time);
+					if (_p18.ctor === 'Ok') {
+						return _elm_lang$core$Date$toTime(_p18._0);
 					} else {
 						return 0;
 					}
@@ -17038,9 +17203,9 @@ var _user$project$Main$calcPercentages = F2(
 						_elm_lang$core$List$filter,
 						function (oldCoin) {
 							var oldDate = function () {
-								var _p18 = _elm_lang$core$Date$fromString(oldCoin.time);
-								if (_p18.ctor === 'Ok') {
-									return _elm_lang$core$Date$toTime(_p18._0);
+								var _p19 = _elm_lang$core$Date$fromString(oldCoin.time);
+								if (_p19.ctor === 'Ok') {
+									return _elm_lang$core$Date$toTime(_p19._0);
 								} else {
 									return 0;
 								}
@@ -17097,9 +17262,9 @@ var _user$project$Main$Order = F5(
 	});
 var _user$project$Main$Error = {ctor: 'Error'};
 var _user$project$Main$errorAlert = function (model) {
-	var _p19 = model.error;
-	if (_p19.ctor === 'Just') {
-		return A2(_user$project$Main$message, _p19._0, _user$project$Main$Error);
+	var _p20 = model.error;
+	if (_p20.ctor === 'Just') {
+		return A2(_user$project$Main$message, _p20._0, _user$project$Main$Error);
 	} else {
 		return _elm_lang$html$Html$text('');
 	}
@@ -17132,7 +17297,7 @@ var _user$project$Main$initialModel = {
 	exchanges: {ctor: '[]'},
 	availableExchanges: {ctor: '[]'},
 	error: _elm_lang$core$Maybe$Nothing,
-	content: _user$project$Main$MarketWatch,
+	content: _user$project$Main$DaytradeScanner,
 	coinigySocketsConnected: false,
 	transactionsBook: {ctor: '[]'},
 	orderBook: {ctor: '[]'}
@@ -17145,8 +17310,8 @@ var _user$project$Main$initModel = function (flags) {
 };
 var _user$project$Main$Period3m = {ctor: 'Period3m'};
 var _user$project$Main$stringToPeriod = function (period) {
-	var _p20 = period;
-	switch (_p20) {
+	var _p21 = period;
+	switch (_p21) {
 		case '3m':
 			return _user$project$Main$Period3m;
 		case '5m':
@@ -17166,9 +17331,6 @@ var _user$project$Main$Buy = {ctor: 'Buy'};
 var _user$project$Main$parseTradeType = function (tradeTypeTxt) {
 	return _elm_lang$core$Native_Utils.eq(tradeTypeTxt, 'Sell') ? _user$project$Main$Sell : _user$project$Main$Buy;
 };
-var _user$project$Main$UpdateWatchMarket = function (a) {
-	return {ctor: 'UpdateWatchMarket', _0: a};
-};
 var _user$project$Main$Logout = {ctor: 'Logout'};
 var _user$project$Main$SetContent = function (a) {
 	return {ctor: 'SetContent', _0: a};
@@ -17178,34 +17340,6 @@ var _user$project$Main$DeleteError = {ctor: 'DeleteError'};
 var _user$project$Main$ResetFilter = {ctor: 'ResetFilter'};
 var _user$project$Main$CoinigySocketConnection = function (a) {
 	return {ctor: 'CoinigySocketConnection', _0: a};
-};
-var _user$project$Main$WatchListResponse = function (a) {
-	return {ctor: 'WatchListResponse', _0: a};
-};
-var _user$project$Main$getWatchList = function (model) {
-	var url = '/api/coinigy/my-markets';
-	var apiSecret = A2(_elm_lang$http$Http$header, 'X-API-SECRET', model.user.apiSecret);
-	var apiKey = A2(_elm_lang$http$Http$header, 'X-API-KEY', model.user.apiKey);
-	var request = _elm_lang$http$Http$request(
-		{
-			method: 'GET',
-			headers: {
-				ctor: '::',
-				_0: apiKey,
-				_1: {
-					ctor: '::',
-					_0: apiSecret,
-					_1: {ctor: '[]'}
-				}
-			},
-			url: url,
-			body: _elm_lang$http$Http$emptyBody,
-			expect: _elm_lang$http$Http$expectJson(_user$project$Main$watchListCoinDecoder),
-			timeout: _elm_lang$core$Maybe$Nothing,
-			withCredentials: false
-		});
-	var cmd = A2(_elm_lang$http$Http$send, _user$project$Main$WatchListResponse, request);
-	return cmd;
 };
 var _user$project$Main$UserKeysResponse = function (a) {
 	return {ctor: 'UserKeysResponse', _0: a};
@@ -17255,14 +17389,14 @@ var _user$project$Main$updateUserSetup = function (model) {
 };
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p21 = msg;
-		switch (_p21.ctor) {
+		var _p22 = msg;
+		switch (_p22.ctor) {
 			case 'CoinigySocketConnection':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{coinigySocketsConnected: _p21._0}),
+						{coinigySocketsConnected: _p22._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'SetContent':
@@ -17270,7 +17404,7 @@ var _user$project$Main$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{content: _p21._0}),
+						{content: _p22._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'Logout':
@@ -17289,9 +17423,9 @@ var _user$project$Main$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'OrdersReceived':
-				var _p23 = _p21._0;
-				var _p22 = _elm_lang$core$List$head(_p23);
-				if (_p22.ctor === 'Just') {
+				var _p24 = _p22._0;
+				var _p23 = _elm_lang$core$List$head(_p24);
+				if (_p23.ctor === 'Just') {
 					var askPrice = A2(
 						_elm_lang$core$Maybe$withDefault,
 						0.0,
@@ -17306,7 +17440,7 @@ var _user$project$Main$update = F2(
 									function (o) {
 										return _elm_lang$core$Native_Utils.eq(o.tradeType, _user$project$Main$Sell);
 									},
-									_p23))));
+									_p24))));
 					var bidPrice = A2(
 						_elm_lang$core$Maybe$withDefault,
 						0.0,
@@ -17321,11 +17455,11 @@ var _user$project$Main$update = F2(
 									function (o) {
 										return _elm_lang$core$Native_Utils.eq(o.tradeType, _user$project$Main$Buy);
 									},
-									_p23))));
+									_p24))));
 					var newMarket = A2(
 						_elm_lang$core$List$map,
 						function (m) {
-							return _elm_lang$core$Native_Utils.eq(m.marketId, _p22._0.marketId) ? _elm_lang$core$Native_Utils.update(
+							return _elm_lang$core$Native_Utils.eq(m.marketId, _p23._0.marketId) ? _elm_lang$core$Native_Utils.update(
 								m,
 								{bidPrice: bidPrice, askPrice: askPrice}) : m;
 						},
@@ -17347,14 +17481,14 @@ var _user$project$Main$update = F2(
 						model,
 						{
 							error: _elm_lang$core$Maybe$Just(
-								A2(_elm_lang$core$Debug$log, 'coinigy received error!', _p21._0))
+								A2(_elm_lang$core$Debug$log, 'coinigy received error!', _p22._0))
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'AlertReceived':
-				var _p24 = _p21._0;
+				var _p25 = _p22._0;
 				var title = 'CryptoTradingBuddy';
-				var updatedCoins = _p24;
+				var updatedCoins = _p25;
 				var countCoins = _elm_lang$core$List$length(updatedCoins);
 				var newTitle = (_elm_lang$core$Native_Utils.cmp(countCoins, 0) > 0) ? A2(
 					_elm_lang$core$Basics_ops['++'],
@@ -17381,7 +17515,7 @@ var _user$project$Main$update = F2(
 									},
 									model.coins)));
 					},
-					_p24);
+					_p25);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -17394,7 +17528,7 @@ var _user$project$Main$update = F2(
 				var newFilter = _elm_lang$core$Native_Utils.update(
 					filter,
 					{
-						period: _user$project$Main$stringToPeriod(_p21._0)
+						period: _user$project$Main$stringToPeriod(_p22._0)
 					});
 				return {
 					ctor: '_Tuple2',
@@ -17408,7 +17542,7 @@ var _user$project$Main$update = F2(
 				var newVolume = A2(
 					_elm_lang$core$Result$withDefault,
 					filter.volume,
-					_elm_lang$core$String$toInt(_p21._0));
+					_elm_lang$core$String$toInt(_p22._0));
 				var newFilter = _elm_lang$core$Native_Utils.update(
 					filter,
 					{volume: newVolume});
@@ -17424,7 +17558,7 @@ var _user$project$Main$update = F2(
 				var newPercentage = A2(
 					_elm_lang$core$Result$withDefault,
 					filter.percentage,
-					_elm_lang$core$String$toInt(_p21._0));
+					_elm_lang$core$String$toInt(_p22._0));
 				var newFilter = _elm_lang$core$Native_Utils.update(
 					filter,
 					{percentage: newPercentage});
@@ -17451,7 +17585,7 @@ var _user$project$Main$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{setupStep: _p21._0}),
+						{setupStep: _p22._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'ResetFilter':
@@ -17484,18 +17618,10 @@ var _user$project$Main$update = F2(
 				};
 			case 'UpdateUserSetup':
 				return _user$project$Main$updateUserSetup(model);
-			case 'UpdateWatchMarket':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{isLoading: true}),
-					_1: _user$project$Main$getWatchList(model)
-				};
 			case 'UserKeysResponse':
-				if (_p21._0.ctor === 'Ok') {
+				if (_p22._0.ctor === 'Ok') {
 					var newUser = _elm_lang$core$Native_Utils.update(
-						_p21._0._0,
+						_p22._0._0,
 						{apiKey: model.user.apiKey, apiSecret: model.user.apiSecret, apiChannelKey: model.user.apiChannelKey});
 					var newModel = _elm_lang$core$Native_Utils.update(
 						model,
@@ -17507,94 +17633,29 @@ var _user$project$Main$update = F2(
 							{
 								ctor: '::',
 								_0: _user$project$Main$saveUser(newUser),
-								_1: {
-									ctor: '::',
-									_0: _user$project$Main$getWatchList(newModel),
-									_1: {ctor: '[]'}
-								}
+								_1: {ctor: '[]'}
 							})
 					};
 				} else {
-					return A3(_user$project$Main$handleResponseErrors, model, _p21._0._0, 'Fail to get user data');
+					return A3(_user$project$Main$handleResponseErrors, model, _p22._0._0, 'Fail to get user data');
 				}
 			case 'ExchangesResponse':
-				if (_p21._0.ctor === 'Ok') {
+				if (_p22._0.ctor === 'Ok') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
-							{availableExchanges: _p21._0._0, isLoading: false}),
+							{availableExchanges: _p22._0._0, isLoading: false}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				} else {
-					return A3(_user$project$Main$handleResponseErrors, model, _p21._0._0, 'Fail to list exchanges');
-				}
-			case 'WatchListResponse':
-				if (_p21._0.ctor === 'Ok') {
-					var _p26 = _p21._0._0;
-					var newMarkets = A2(
-						_elm_lang$core$List$filter,
-						function (r) {
-							return _elm_lang$core$Native_Utils.eq(
-								_elm_lang$core$List$length(
-									A2(
-										_elm_lang$core$List$filter,
-										function (m) {
-											return _elm_lang$core$Native_Utils.eq(m.marketId, r.marketId);
-										},
-										model.watchMarkets)),
-								0);
-						},
-						_p26);
-					var oldMarkets = A2(
-						_elm_lang$core$List$map,
-						function (m) {
-							var newMarket = _elm_lang$core$List$head(
-								A2(
-									_elm_lang$core$List$filter,
-									function (r) {
-										return _elm_lang$core$Native_Utils.eq(r.marketId, m.marketId);
-									},
-									_p26));
-							var _p25 = newMarket;
-							if (_p25.ctor === 'Just') {
-								return _elm_lang$core$Native_Utils.update(
-									_p25._0,
-									{askPrice: m.askPrice, bidPrice: m.bidPrice});
-							} else {
-								return m;
-							}
-						},
-						model.watchMarkets);
-					var finalMarkets = A2(
-						_user$project$Main$calcPercentages,
-						A2(_elm_lang$core$Basics_ops['++'], newMarkets, oldMarkets),
-						model.history);
-					var cmd = (!model.coinigySocketsConnected) ? _user$project$Main$startSockets(
-						{user: model.user, exchanges: _p26}) : _elm_lang$core$Platform_Cmd$none;
-					var setupStep = (_elm_lang$core$Native_Utils.cmp(
-						_elm_lang$core$List$length(_p26),
-						0) > 0) ? _user$project$Main$None : _user$project$Main$ExchangesSetup;
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								watchMarkets: finalMarkets,
-								history: A2(_elm_lang$core$Basics_ops['++'], finalMarkets, model.history),
-								isLoading: false,
-								setupStep: setupStep
-							}),
-						_1: cmd
-					};
-				} else {
-					return A3(_user$project$Main$handleResponseErrors, model, _p21._0._0, 'Fail to get watched coins');
+					return A3(_user$project$Main$handleResponseErrors, model, _p22._0._0, 'Fail to list exchanges');
 				}
 			case 'UpdateCoinigyKey':
 				var user = model.user;
 				var newUser = _elm_lang$core$Native_Utils.update(
 					user,
-					{apiKey: _p21._0});
+					{apiKey: _p22._0});
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -17606,7 +17667,7 @@ var _user$project$Main$update = F2(
 				var user = model.user;
 				var newUser = _elm_lang$core$Native_Utils.update(
 					user,
-					{apiChannelKey: _p21._0});
+					{apiChannelKey: _p22._0});
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -17618,7 +17679,7 @@ var _user$project$Main$update = F2(
 				var user = model.user;
 				var newUser = _elm_lang$core$Native_Utils.update(
 					user,
-					{apiSecret: _p21._0});
+					{apiSecret: _p22._0});
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -17667,11 +17728,7 @@ var _user$project$Main$init = function (flags) {
 			{
 				ctor: '::',
 				_0: _user$project$Main$listExchanges(model),
-				_1: {
-					ctor: '::',
-					_0: _user$project$Main$getWatchList(model),
-					_1: {ctor: '[]'}
-				}
+				_1: {ctor: '[]'}
 			})
 	} : {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 	return cmd;
@@ -17691,9 +17748,9 @@ var _user$project$Main$ToggleSetup = function (a) {
 };
 var _user$project$Main$setupModal = function (model) {
 	var userData = model.user;
-	var _p27 = function () {
-		var _p28 = model.setupStep;
-		switch (_p28.ctor) {
+	var _p26 = function () {
+		var _p27 = model.setupStep;
+		switch (_p27.ctor) {
 			case 'UserSetup':
 				return {
 					ctor: '_Tuple3',
@@ -17776,9 +17833,9 @@ var _user$project$Main$setupModal = function (model) {
 				};
 		}
 	}();
-	var formContent = _p27._0;
-	var submitButton = _p27._1;
-	var cancelButton = _p27._2;
+	var formContent = _p26._0;
+	var submitButton = _p26._1;
+	var cancelButton = _p26._2;
 	return A6(
 		_user$project$Main$modalCard,
 		model,
@@ -17962,33 +18019,6 @@ var _user$project$Main$topMenu = function (model) {
 };
 var _user$project$Main$ShowFilter = {ctor: 'ShowFilter'};
 var _user$project$Main$scannerContent = function (model) {
-	var content = (_elm_lang$core$Native_Utils.cmp(
-		_elm_lang$core$List$length(model.coins),
-		0) > 0) ? A2(
-		_elm_lang$html$Html$div,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('columns is-multiline'),
-			_1: {ctor: '[]'}
-		},
-		A2(
-			_elm_lang$core$List$map,
-			function (c) {
-				return _user$project$Main$coinCard(c);
-			},
-			A2(
-				_elm_lang$core$List$sortBy,
-				function (_) {
-					return _.percentage;
-				},
-				model.coins))) : A2(
-		_elm_lang$html$Html$p,
-		{ctor: '[]'},
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html$text('Go relax man! No scanner alerts... at least for now!'),
-			_1: {ctor: '[]'}
-		});
 	var filter = model.filter;
 	var filtering = A2(
 		_elm_lang$core$Basics_ops['++'],
@@ -18009,6 +18039,33 @@ var _user$project$Main$scannerContent = function (model) {
 							_elm_lang$core$Basics_ops['++'],
 							_elm_lang$core$Basics$toString(filter.volume),
 							'+ BTC Vol'))))));
+	var content = (_elm_lang$core$Native_Utils.cmp(
+		_elm_lang$core$List$length(model.coins),
+		0) > 0) ? A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('columns is-multiline'),
+			_1: {ctor: '[]'}
+		},
+		A2(
+			_elm_lang$core$List$map,
+			function (c) {
+				return A2(_user$project$Main$coinCard, c, filter);
+			},
+			A2(
+				_elm_lang$core$List$sortBy,
+				function (_) {
+					return _.percentage;
+				},
+				model.coins))) : A2(
+		_elm_lang$html$Html$p,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html$text('Go relax man! No scanner alerts... at least for now!'),
+			_1: {ctor: '[]'}
+		});
 	return A2(
 		_elm_lang$html$Html$div,
 		{ctor: '[]'},
@@ -18018,7 +18075,7 @@ var _user$project$Main$scannerContent = function (model) {
 				_elm_lang$html$Html$div,
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$class('has-text-right'),
+					_0: _elm_lang$html$Html_Attributes$class('has-text-right filter-link'),
 					_1: {ctor: '[]'}
 				},
 				{
@@ -18027,12 +18084,8 @@ var _user$project$Main$scannerContent = function (model) {
 						_elm_lang$html$Html$a,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('filter-link'),
-							_1: {
-								ctor: '::',
-								_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$ShowFilter),
-								_1: {ctor: '[]'}
-							}
+							_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$ShowFilter),
+							_1: {ctor: '[]'}
 						},
 						{
 							ctor: '::',
@@ -18116,8 +18169,8 @@ var _user$project$Main$mainContent = function (model) {
 			});
 	} else {
 		var content = function () {
-			var _p29 = model.content;
-			switch (_p29.ctor) {
+			var _p28 = model.content;
+			switch (_p28.ctor) {
 				case 'MarketWatch':
 					return _user$project$Main$watchListContent(model);
 				case 'DaytradeScanner':
@@ -18310,39 +18363,7 @@ var _user$project$Main$mainContent = function (model) {
 												}),
 											_1: {ctor: '[]'}
 										}),
-									_1: {
-										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$li,
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$class(
-													_elm_lang$core$Native_Utils.eq(model.content, _user$project$Main$MarketWatch) ? 'is-active' : ''),
-												_1: {ctor: '[]'}
-											},
-											{
-												ctor: '::',
-												_0: A2(
-													_elm_lang$html$Html$a,
-													{
-														ctor: '::',
-														_0: _elm_lang$html$Html_Events$onClick(
-															_user$project$Main$SetContent(_user$project$Main$MarketWatch)),
-														_1: {ctor: '[]'}
-													},
-													{
-														ctor: '::',
-														_0: A3(_user$project$Main$icon, 'star', false, false),
-														_1: {
-															ctor: '::',
-															_0: _elm_lang$html$Html$text('Favorites'),
-															_1: {ctor: '[]'}
-														}
-													}),
-												_1: {ctor: '[]'}
-											}),
-										_1: {ctor: '[]'}
-									}
+									_1: {ctor: '[]'}
 								}
 							}
 						}
@@ -18440,7 +18461,7 @@ var _user$project$Main$filterModal = function (model) {
 						_0: A6(_user$project$Main$fieldInput, model, 'Percentage', percentage, '-9', 'percent', _user$project$Main$UpdatePercentage),
 						_1: {
 							ctor: '::',
-							_0: A6(_user$project$Main$fieldInput, model, 'Volume', volume, '10', 'btc', _user$project$Main$UpdateVolume),
+							_0: A6(_user$project$Main$fieldInput, model, 'Current Period Volume (USD)', volume, '50000', 'dollar', _user$project$Main$UpdateVolume),
 							_1: {ctor: '[]'}
 						}
 					}
@@ -18577,15 +18598,11 @@ var _user$project$Main$subscriptions = function (model) {
 	return (!_elm_lang$core$String$isEmpty(model.user.id)) ? _elm_lang$core$Platform_Sub$batch(
 		{
 			ctor: '::',
-			_0: A2(_elm_lang$core$Time$every, 60 * _elm_lang$core$Time$second, _user$project$Main$UpdateWatchMarket),
+			_0: _user$project$Main$coinigySocketConnection(_user$project$Main$CoinigySocketConnection),
 			_1: {
 				ctor: '::',
-				_0: _user$project$Main$coinigySocketConnection(_user$project$Main$CoinigySocketConnection),
-				_1: {
-					ctor: '::',
-					_0: _user$project$Main$newAlert(_user$project$Main$AlertReceived),
-					_1: {ctor: '[]'}
-				}
+				_0: _user$project$Main$newAlert(_user$project$Main$AlertReceived),
+				_1: {ctor: '[]'}
 			}
 		}) : _elm_lang$core$Platform_Sub$none;
 };
@@ -18661,7 +18678,7 @@ var _user$project$Main$main = _elm_lang$html$Html$programWithFlags(
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
 if (typeof _user$project$Main$main !== 'undefined') {
-    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"unions":{"Dict.LeafColor":{"args":[],"tags":{"LBBlack":[],"LBlack":[]}},"Main.SetupStep":{"args":[],"tags":{"ExchangesSetup":[],"None":[],"UserSetup":[]}},"Main.TradeType":{"args":[],"tags":{"Sell":[],"Buy":[]}},"Dict.Dict":{"args":["k","v"],"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Main.Content":{"args":[],"tags":{"BaseCracker":[],"MarketWatch":[],"ActiveTrades":[],"MyReports":[],"DaytradeScanner":[]}},"Main.Msg":{"args":[],"tags":{"UpdateWatchMarket":["Time.Time"],"Logout":[],"UpdateCoinigyKey":["String"],"ToggleSetup":["Main.SetupStep"],"ResetFilter":[],"SetContent":["Main.Content"],"ShowFilter":[],"ExchangesResponse":["Result.Result Http.Error (List Main.Exchange)"],"UserKeysResponse":["Result.Result Http.Error Main.User"],"ToggleSound":[],"UpdatePercentage":["String"],"DeleteError":[],"UpdateCoinigyChannelKey":["String"],"CoinigyFailReceived":["String"],"UpdatePeriod":["String"],"CoinigySocketConnection":["Bool"],"UpdateUserSetup":[],"SetFilter":[],"OrdersReceived":["List Main.Order"],"WatchListResponse":["Result.Result Http.Error (List Main.Coin)"],"UpdateCoinigySecret":["String"],"AlertReceived":["List Main.Coin"],"UpdateVolume":["String"]}},"Dict.NColor":{"args":[],"tags":{"BBlack":[],"Red":[],"NBlack":[],"Black":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String"],"NetworkError":[],"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}}},"aliases":{"Main.User":{"args":[],"type":"{ id : String , email : String , name : String , apiKey : String , apiSecret : String , apiChannelKey : String }"},"Http.Response":{"args":["body"],"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }"},"Main.Period":{"args":[],"type":"{ min : Float, max : Float, diff : Float, percentage : Float }"},"Main.Order":{"args":[],"type":"{ tradeType : Main.TradeType , price : Float , quantity : Float , time : String , marketId : String }"},"Main.Coin":{"args":[],"type":"{ exchange : String , marketId : String , base : String , quote : String , market : String , from : Float , to : Float , volume : Float , btcVolume : Float , bidPrice : Float , askPrice : Float , percentage : Float , time : String , period3m : Maybe.Maybe Main.Period , period5m : Maybe.Maybe Main.Period , period10m : Maybe.Maybe Main.Period , period15m : Maybe.Maybe Main.Period , period30m : Maybe.Maybe Main.Period }"},"Time.Time":{"args":[],"type":"Float"},"Main.Exchange":{"args":[],"type":"{ id : String, code : String, name : String }"}},"message":"Main.Msg"},"versions":{"elm":"0.18.0"}});
+    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"unions":{"Dict.LeafColor":{"args":[],"tags":{"LBBlack":[],"LBlack":[]}},"Main.SetupStep":{"args":[],"tags":{"ExchangesSetup":[],"None":[],"UserSetup":[]}},"Main.TradeType":{"args":[],"tags":{"Sell":[],"Buy":[]}},"Dict.Dict":{"args":["k","v"],"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Main.Content":{"args":[],"tags":{"BaseCracker":[],"MarketWatch":[],"ActiveTrades":[],"MyReports":[],"DaytradeScanner":[]}},"Main.Msg":{"args":[],"tags":{"Logout":[],"UpdateCoinigyKey":["String"],"ToggleSetup":["Main.SetupStep"],"ResetFilter":[],"SetContent":["Main.Content"],"ShowFilter":[],"ExchangesResponse":["Result.Result Http.Error (List Main.Exchange)"],"UserKeysResponse":["Result.Result Http.Error Main.User"],"ToggleSound":[],"UpdatePercentage":["String"],"DeleteError":[],"UpdateCoinigyChannelKey":["String"],"CoinigyFailReceived":["String"],"UpdatePeriod":["String"],"CoinigySocketConnection":["Bool"],"UpdateUserSetup":[],"SetFilter":[],"OrdersReceived":["List Main.Order"],"UpdateCoinigySecret":["String"],"AlertReceived":["List Main.Coin"],"UpdateVolume":["String"]}},"Dict.NColor":{"args":[],"tags":{"BBlack":[],"Red":[],"NBlack":[],"Black":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String"],"NetworkError":[],"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}}},"aliases":{"Main.User":{"args":[],"type":"{ id : String , email : String , name : String , apiKey : String , apiSecret : String , apiChannelKey : String }"},"Http.Response":{"args":["body"],"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }"},"Main.Period":{"args":[],"type":"{ min : Float, max : Float, diff : Float, percentage : Float }"},"Main.Order":{"args":[],"type":"{ tradeType : Main.TradeType , price : Float , quantity : Float , time : String , marketId : String }"},"Main.Coin":{"args":[],"type":"{ exchange : String , marketId : String , base : String , quote : String , market : String , from : Float , to : Float , lastPrice : Float , volume : Float , btcVolume : Float , bidPrice : Float , askPrice : Float , percentage : Float , time : String , period3m : Maybe.Maybe Main.Period , period5m : Maybe.Maybe Main.Period , period10m : Maybe.Maybe Main.Period , period15m : Maybe.Maybe Main.Period , period30m : Maybe.Maybe Main.Period }"},"Main.Exchange":{"args":[],"type":"{ id : String, code : String, name : String }"}},"message":"Main.Msg"},"versions":{"elm":"0.18.0"}});
 }
 
 if (typeof define === "function" && define['amd'])

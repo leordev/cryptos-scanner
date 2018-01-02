@@ -12,8 +12,14 @@ defmodule CryptoScannerWeb.CoinigyController do
   end
 
   def get(conn, _params) do
-    {:ok, coins} = CoinigyServer.get_coins(:coinigy)
+    {:ok, coins} = CoinigyServer.get_coins()
     json conn, coins
+  end
+
+  def get_coin(conn,
+    %{"exchange" => exch, "base" => base, "quote" => quote}) do
+    {:ok, coin} = CoinigyServer.get_coin(exch, base <> "/" <> quote)
+    json conn, coin
   end
 
   def get_exchanges(conn, _params) do

@@ -6484,6 +6484,9 @@ form {
   margin-bottom: 20px; }
 
 .filter-link {
+  margin: 20px; }
+
+.filter-link a {
   color: #3273dc;
   border-bottom: 1px dashed #3273dc; }
 
