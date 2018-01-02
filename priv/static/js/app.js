@@ -142,7 +142,7 @@ channel.join().receive("ok", function (resp) {
   console.log("Unable to join", resp);
 });
 
-channel.push("set_filter", { period: "5m", percentage: -4 });
+channel.push("set_filter", { period: "5m", percentage: -4, volume: 2 });
 
 channel.on("tick_alert", function (payload) {
   var coins = payload.coins.map(function (c) {
@@ -18461,7 +18461,7 @@ var _user$project$Main$filterModal = function (model) {
 						_0: A6(_user$project$Main$fieldInput, model, 'Percentage', percentage, '-9', 'percent', _user$project$Main$UpdatePercentage),
 						_1: {
 							ctor: '::',
-							_0: A6(_user$project$Main$fieldInput, model, 'Current Period Volume (USD)', volume, '50000', 'dollar', _user$project$Main$UpdateVolume),
+							_0: A6(_user$project$Main$fieldInput, model, 'Current Period Volume (BTC)', volume, '50000', 'btc', _user$project$Main$UpdateVolume),
 							_1: {ctor: '[]'}
 						}
 					}

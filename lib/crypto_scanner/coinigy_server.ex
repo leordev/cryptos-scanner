@@ -7,6 +7,7 @@ defmodule CryptoScanner.CoinigyServer do
   # alias CryptoScanner.Coin
   # alias CryptoScanner.Coinigy
   alias CryptoScanner.CoinigyClient
+  alias CryptoScanner.CryptoCompare
 
   def start_link(options) do
 
@@ -30,10 +31,12 @@ defmodule CryptoScanner.CoinigyServer do
       ws_token: nil,
       ws_channels: [],
       ws_subscriptions: [],
+      btc_price: 0.0,
+      eth_price: 0.0,
       tick: 0
     }
 
-    #schedule_coins()
+    Process.send_after(self(), :update_base_prices, 500)
     Process.send_after(self(), :ws_auth, 1_000)
     Process.send_after(self(), :ws_ticker, 30_000)
 
@@ -50,8 +53,19 @@ defmodule CryptoScanner.CoinigyServer do
     {:noreply, state}
   end
 
+  def handle_info(:update_base_prices, state) do
+    {:ok, btc, eth} = CryptoCompare.get_prices()
+    Logger.info(">>>>> Updated BTC Price: #{btc}")
+    Logger.info(">>>>> Updated ETH Price: #{eth}")
+
+    # update prices every 5 minutes
+    Process.send_after(self(), :update_base_prices, 1000 * 60 * 5)
+
+    {:noreply, %{ state | btc_price: btc, eth_price: eth } }
+  end
+
   def handle_info(:ws_ticker, state) do
-    CryptoScannerWeb.Endpoint.broadcast("scanner:alerts", "tick_alert", %{"coins" => state.coins})
+    CryptoScannerWeb.Endpoint.broadcast("scanner:alerts", "tick_alert", %{"coins" => state.coins, "btc_price" => state.btc_price, "eth_price" => state.eth_price})
 
     Process.send_after(self(), :ws_ticker, 6_000)
     {:noreply, state}

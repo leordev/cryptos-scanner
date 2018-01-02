@@ -60,7 +60,7 @@ channel.join()
   .receive("ok", resp => { console.log("Joined successfully") })
   .receive("error", resp => { console.log("Unable to join", resp) })
 
-channel.push("set_filter", { period: "5m", percentage: -4})
+channel.push("set_filter", { period: "5m", percentage: -4, volume: 2})
 
 channel.on("tick_alert", payload => {
   const coins = payload.coins.map(c => {

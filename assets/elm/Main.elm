@@ -1307,10 +1307,10 @@ filterModal model =
                     UpdatePercentage
                 , fieldInput
                     model
-                    "Current Period Volume (USD)"
+                    "Current Period Volume (BTC)"
                     volume
                     "50000"
-                    "dollar"
+                    "btc"
                     UpdateVolume
                 ]
             ]
