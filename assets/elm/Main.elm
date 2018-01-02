@@ -531,6 +531,27 @@ update msg model =
                                     |> (<) 0
                             )
 
+                history =
+                    model.history
+                        |> List.map
+                            (\i ->
+                                oldCoins
+                                    |> List.filter (\o -> o.exchange == i.exchange && o.market == i.market)
+                                    |> List.head
+                                    |> Maybe.withDefault i
+                            )
+
+                newHistory =
+                    oldCoins
+                        |> List.filter
+                            (\i ->
+                                history
+                                    |> List.filter (\o -> o.exchange == i.exchange && o.market == i.market)
+                                    |> List.length
+                                    |> (==) 0
+                            )
+                        |> flip (++) history
+
                 updatedCoins =
                     coins
 
@@ -549,7 +570,7 @@ update msg model =
                 cmd =
                     setTitle newTitle
             in
-                ( { model | coins = updatedCoins }, cmd )
+                ( { model | coins = updatedCoins, history = newHistory }, cmd )
 
         UpdatePeriod period ->
             let
@@ -1760,6 +1781,38 @@ mainContent model =
                 ]
 
 
+historyContent : Model -> Html Msg
+historyContent model =
+    table [ class "table is-striped is-hoverable is-fullwidth" ]
+        [ thead []
+            [ tr []
+                [ th [] [ text "Exchange" ]
+                , th [] [ text "Market" ]
+                , th [] [ text "BTC Volume" ]
+                , th [] [ text "Last Price" ]
+                , th [] [ text "Current Bid" ]
+                , th [] [ text "Current Ask" ]
+                , th [] [ text ("Diff %") ]
+                ]
+            ]
+        , tbody []
+            (model.history
+                |> List.map
+                    (\item ->
+                        tr []
+                            [ td [] [ text item.exchange ]
+                            , td [] [ text item.market ]
+                            , td [] [ text (toString item.btcVolume) ]
+                            , td [] [ text (toString item.to) ]
+                            , td [] [ text (toString item.bidPrice) ]
+                            , td [] [ text (toString item.askPrice) ]
+                            , td [] [ text ((FormatNumber.format usLocale (abs item.percentage)) ++ "%") ]
+                            ]
+                    )
+            )
+        ]
+
+
 watchListContent : Model -> Html Msg
 watchListContent model =
     table [ class "table is-striped is-hoverable is-fullwidth" ]
@@ -1818,7 +1871,7 @@ watchListContent model =
                             tr []
                                 [ td [] [ text item.exchange ]
                                 , td [] [ text item.market ]
-                                , td [] [ text (toString item.btcVolume) ]
+                                , td [] [ text (FormatNumber.format usLocale (abs item.btcVolume)) ]
                                 , td [] [ text (toString item.to) ]
                                 , td [] [ text (toString item.bidPrice) ]
                                 , td [] [ text (toString item.askPrice) ]
@@ -1863,6 +1916,8 @@ scannerContent model =
                     [ text filtering, icon "cog" False False ]
                 ]
             , content
+            , h2 [ class "title is-3" ] [ text "History" ]
+            , historyContent model
             ]
 
 

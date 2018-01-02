@@ -15118,6 +15118,210 @@ var _elm_lang$http$Http$StringPart = F2(
 	});
 var _elm_lang$http$Http$stringPart = _elm_lang$http$Http$StringPart;
 
+var _user$project$Main$historyContent = function (model) {
+	return A2(
+		_elm_lang$html$Html$table,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('table is-striped is-hoverable is-fullwidth'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$thead,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$tr,
+						{ctor: '[]'},
+						{
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$th,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('Exchange'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$th,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('Market'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$th,
+										{ctor: '[]'},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('BTC Volume'),
+											_1: {ctor: '[]'}
+										}),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$th,
+											{ctor: '[]'},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('Last Price'),
+												_1: {ctor: '[]'}
+											}),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$th,
+												{ctor: '[]'},
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html$text('Current Bid'),
+													_1: {ctor: '[]'}
+												}),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$th,
+													{ctor: '[]'},
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html$text('Current Ask'),
+														_1: {ctor: '[]'}
+													}),
+												_1: {
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$th,
+														{ctor: '[]'},
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html$text('Diff %'),
+															_1: {ctor: '[]'}
+														}),
+													_1: {ctor: '[]'}
+												}
+											}
+										}
+									}
+								}
+							}
+						}),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$tbody,
+					{ctor: '[]'},
+					A2(
+						_elm_lang$core$List$map,
+						function (item) {
+							return A2(
+								_elm_lang$html$Html$tr,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$td,
+										{ctor: '[]'},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text(item.exchange),
+											_1: {ctor: '[]'}
+										}),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$td,
+											{ctor: '[]'},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text(item.market),
+												_1: {ctor: '[]'}
+											}),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$td,
+												{ctor: '[]'},
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html$text(
+														_elm_lang$core$Basics$toString(item.btcVolume)),
+													_1: {ctor: '[]'}
+												}),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$td,
+													{ctor: '[]'},
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html$text(
+															_elm_lang$core$Basics$toString(item.to)),
+														_1: {ctor: '[]'}
+													}),
+												_1: {
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$td,
+														{ctor: '[]'},
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html$text(
+																_elm_lang$core$Basics$toString(item.bidPrice)),
+															_1: {ctor: '[]'}
+														}),
+													_1: {
+														ctor: '::',
+														_0: A2(
+															_elm_lang$html$Html$td,
+															{ctor: '[]'},
+															{
+																ctor: '::',
+																_0: _elm_lang$html$Html$text(
+																	_elm_lang$core$Basics$toString(item.askPrice)),
+																_1: {ctor: '[]'}
+															}),
+														_1: {
+															ctor: '::',
+															_0: A2(
+																_elm_lang$html$Html$td,
+																{ctor: '[]'},
+																{
+																	ctor: '::',
+																	_0: _elm_lang$html$Html$text(
+																		A2(
+																			_elm_lang$core$Basics_ops['++'],
+																			A2(
+																				_cuducos$elm_format_number$FormatNumber$format,
+																				_cuducos$elm_format_number$FormatNumber_Locales$usLocale,
+																				_elm_lang$core$Basics$abs(item.percentage)),
+																			'%')),
+																	_1: {ctor: '[]'}
+																}),
+															_1: {ctor: '[]'}
+														}
+													}
+												}
+											}
+										}
+									}
+								});
+						},
+						model.history)),
+				_1: {ctor: '[]'}
+			}
+		});
+};
 var _user$project$Main$message = F2(
 	function (txt, messageType) {
 		var messageClass = function () {
@@ -16509,7 +16713,10 @@ var _user$project$Main$watchListContent = function (model) {
 												{
 													ctor: '::',
 													_0: _elm_lang$html$Html$text(
-														_elm_lang$core$Basics$toString(item.btcVolume)),
+														A2(
+															_cuducos$elm_format_number$FormatNumber$format,
+															_cuducos$elm_format_number$FormatNumber_Locales$usLocale,
+															_elm_lang$core$Basics$abs(item.btcVolume))),
 													_1: {ctor: '[]'}
 												}),
 											_1: {
@@ -17516,11 +17723,51 @@ var _user$project$Main$update = F2(
 									model.coins)));
 					},
 					_p25);
+				var history = A2(
+					_elm_lang$core$List$map,
+					function (i) {
+						return A2(
+							_elm_lang$core$Maybe$withDefault,
+							i,
+							_elm_lang$core$List$head(
+								A2(
+									_elm_lang$core$List$filter,
+									function (o) {
+										return _elm_lang$core$Native_Utils.eq(o.exchange, i.exchange) && _elm_lang$core$Native_Utils.eq(o.market, i.market);
+									},
+									oldCoins)));
+					},
+					model.history);
+				var newHistory = A3(
+					_elm_lang$core$Basics$flip,
+					F2(
+						function (x, y) {
+							return A2(_elm_lang$core$Basics_ops['++'], x, y);
+						}),
+					history,
+					A2(
+						_elm_lang$core$List$filter,
+						function (i) {
+							return A2(
+								F2(
+									function (x, y) {
+										return _elm_lang$core$Native_Utils.eq(x, y);
+									}),
+								0,
+								_elm_lang$core$List$length(
+									A2(
+										_elm_lang$core$List$filter,
+										function (o) {
+											return _elm_lang$core$Native_Utils.eq(o.exchange, i.exchange) && _elm_lang$core$Native_Utils.eq(o.market, i.market);
+										},
+										history)));
+						},
+						oldCoins));
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{coins: updatedCoins}),
+						{coins: updatedCoins, history: newHistory}),
 					_1: cmd
 				};
 			case 'UpdatePeriod':
@@ -18101,7 +18348,26 @@ var _user$project$Main$scannerContent = function (model) {
 			_1: {
 				ctor: '::',
 				_0: content,
-				_1: {ctor: '[]'}
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$h2,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('title is-3'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('History'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: _user$project$Main$historyContent(model),
+						_1: {ctor: '[]'}
+					}
+				}
 			}
 		});
 };

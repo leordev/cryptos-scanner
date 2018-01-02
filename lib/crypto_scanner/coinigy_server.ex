@@ -54,9 +54,15 @@ defmodule CryptoScanner.CoinigyServer do
   end
 
   def handle_info(:update_base_prices, state) do
-    {:ok, btc, eth} = CryptoCompare.get_prices()
-    Logger.info(">>>>> Updated BTC Price: #{btc}")
-    Logger.info(">>>>> Updated ETH Price: #{eth}")
+    {btc, eth} = case CryptoCompare.get_prices() do
+      {:ok, b, e} ->
+        Logger.info(">>>>> Updated BTC Price: #{b}")
+        Logger.info(">>>>> Updated ETH Price: #{e}")
+        {b, e}
+      {:error, _any} ->
+        Logger.info(">>>>> Fail to read BTC/ETH price, do not change")
+        {state.btc_price, state.eth_price}
+    end
 
     # update prices every 5 minutes
     Process.send_after(self(), :update_base_prices, 1000 * 60 * 5)
