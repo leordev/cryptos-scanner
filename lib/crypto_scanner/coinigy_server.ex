@@ -18,16 +18,13 @@ defmodule CryptoScanner.CoinigyServer do
   def init(name) do
     Logger.info("Starting Coinigy Server #{name}")
 
-    {:ok, ws_client} =
-      CoinigyClient.start_link()
-
     state = %{
       name: name,
       status: :active,
       last_check: System.os_time,
       coins: [],
       prices: [],
-      ws_client: ws_client,
+      ws_client: nil,
       ws_token: nil,
       ws_channels: [],
       ws_subscriptions: [],
@@ -37,20 +34,25 @@ defmodule CryptoScanner.CoinigyServer do
     }
 
     Process.send_after(self(), :update_base_prices, 500)
-    Process.send_after(self(), :ws_auth, 1_000)
+    Process.send_after(self(), :ws_connect, 500)
     Process.send_after(self(), :ws_ticker, 30_000)
 
     {:ok, state}
   end
 
-  def handle_info(:ws_auth, state) do
-    CoinigyClient.auth(state.ws_client, System.get_env("COINIGY_API_KEY"), System.get_env("COINIGY_API_SECRET"))
-    {:noreply, state}
-  end
+  # def handle_info(:ws_auth, state) do
+  #   CoinigyClient.auth(state.ws_client, System.get_env("COINIGY_API_KEY"), System.get_env("COINIGY_API_SECRET"))
+  #   {:noreply, state}
+  # end
 
   def handle_info(:ws_default_subs, state) do
     CoinigyClient.setup_default_channels()
     {:noreply, state}
+  end
+
+  def handle_info(:ws_connect, state) do
+    {:ok, ws_client} = CoinigyClient.start_link()
+    {:noreply, %{ state | ws_client: ws_client }}
   end
 
   def handle_info(:update_base_prices, state) do
@@ -81,12 +83,16 @@ defmodule CryptoScanner.CoinigyServer do
     GenServer.call(:coinigy, {:subscribe_to_channels, exch, base})
   end
 
+  def ws_connect() do
+    GenServer.call(:coinigy, :ws_connect)
+  end
+
   def get_coins() do
-    GenServer.call(:coinigy, :get_coins)
+    GenServer.call(:coinigy, :get_coins, 15_000)
   end
 
   def get_coin(exch, market) do
-    GenServer.call(:coinigy, {:get_coin, exch, market})
+    GenServer.call(:coinigy, {:get_coin, exch, market}, 15_000)
   end
 
   def get_subscriptions() do
@@ -120,7 +126,6 @@ defmodule CryptoScanner.CoinigyServer do
       GenServer.call(:coinigy, {:subscribe_to_channels, "PLNX", "USD"})
       GenServer.call(:coinigy, {:subscribe_to_channels, "HITB", "USD"})
       GenServer.call(:coinigy, {:subscribe_to_channels, "HITB", "ETH"})
-      GenServer.call(:coinigy, {:subscribe_to_channels, "LIQU", "BTC"})
       GenServer.call(:coinigy, {:subscribe_to_channels, "BINA", "BTC"})
     end
   end
@@ -131,6 +136,11 @@ defmodule CryptoScanner.CoinigyServer do
 
   def tick_orders(data) do
     GenServer.cast(:coinigy, {:tick_orders, data})
+  end
+
+  def handle_call(:ws_connect, _from, state) do
+    {:ok, ws_client} = CoinigyClient.start_link()
+    {:reply, :ok, %{state | ws_client: ws_client}}
   end
 
   def handle_call(:get_coins, _from, state) do
@@ -231,7 +241,14 @@ defmodule CryptoScanner.CoinigyServer do
     new_state =
       if coin != nil do
 
-        new_prices = [ raw_price | coin["prices"] ]
+        last_30m = System.os_time - (30 * 60 * 1000 * 1_000_000)
+
+        # keeps only 30m of price data
+        current_prices = coin["prices"]
+          |> Enum.filter(fn i -> i["time"] >= last_30m end)
+        # TODO: should I aggregate data as minutes candlesticks?
+
+        new_prices = [ raw_price | current_prices ]
 
         updated_coin = %{ coin |
           "last_price" => raw_price["price"],
@@ -265,7 +282,7 @@ defmodule CryptoScanner.CoinigyServer do
           "volume" => 0
         } |> calc_prices_percentages
 
-        Logger.info("Adding new Coin #{inspect(new_coin)}")
+        # Logger.info("Adding new Coin #{inspect(new_coin)}")
 
         %{ state | coins: [new_coin | state.coins] }
       end
@@ -318,7 +335,7 @@ defmodule CryptoScanner.CoinigyServer do
           "volume" => 0
         } |> calc_prices_percentages
 
-        Logger.info("Adding new Coin #{inspect(new_coin)}")
+        # Logger.info("Adding new Coin #{inspect(new_coin)}")
 
         %{ state | coins: [new_coin | state.coins] }
       end
@@ -381,38 +398,5 @@ defmodule CryptoScanner.CoinigyServer do
         "percentage" => prices_percentage,
         "volume" => volume
       }
-
-    # prices = coin["prices"]
-    #   |> Enum.filter(&(&1["time"] >= time))
-    #   |> Enum.map(&(&1["price"]))
-    #
-    # if Enum.count(prices) > 0 do
-    #   prices_max = prices |> Enum.max
-    #   prices_min = prices |> Enum.min
-    #   prices_diff = (prices_max - prices_min) * -1
-    #   prices_percentage = if abs(prices_diff) > 0 do
-    #     ((prices_min / prices_max) - 1) * 100
-    #   else
-    #     0
-    #   end
-    #
-    #   res = %{
-    #     "min" => prices_min,
-    #     "max" => prices_max,
-    #     "diff" => prices_diff,
-    #     "percentage" => prices_percentage
-    #   }
-    #
-    #   # Logger.info("Price #{coin["symbol"]} - #{inspect(res)}")
-    #
-    #   res
-    # else
-    #   %{
-    #     "min" => 0,
-    #     "max" => 0,
-    #     "diff" => 0,
-    #     "percentage" => 0
-    #   }
-    # end
   end
 end

@@ -73,7 +73,7 @@ channel.on("tick_alert", payload => {
       askPrice: Number.parseFloat(c.askPrice),
       lastPrice: Number.parseFloat(c.lastPrice || 0),
       percentage: Number.parseFloat(c.percentage.toFixed(2)),
-      time: (new Date).toString()
+      time: Math.trunc(c.time / 1000000)
     })
   })
   app.ports.newAlert.send(coins)

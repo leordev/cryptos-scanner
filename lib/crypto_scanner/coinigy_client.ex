@@ -19,10 +19,10 @@ defmodule CryptoScanner.CoinigyClient do
     emit(pid, "#handshake", %{ "authToken" => nil })
   end
 
-  def auth(pid, key, secret) do
-    Logger.info("Authenticating to Coinigy SocketCluster")
-    emit(pid, "auth", %{"apiKey" => key, "apiSecret" => secret})
-  end
+  # def auth(pid, key, secret) do
+  #   Logger.info("Authenticating to Coinigy SocketCluster")
+  #   emit(pid, "auth", %{"apiKey" => key, "apiSecret" => secret})
+  # end
 
   def pong(pid, ping) do
     Logger.info("Ping Reply to Coinigy SocketCluster")
@@ -81,6 +81,7 @@ defmodule CryptoScanner.CoinigyClient do
       {:error, error} ->
         Logger.info("Coinigy Msg fail to decode #{inspect(error)}")
         Logger.info("Coinigy Msg >>> #{msg}")
+        {:ok, state}
       {:ok, %{ "event" => event, "data" => data }} ->
         case event do
           "#setAuthToken" ->
@@ -91,6 +92,7 @@ defmodule CryptoScanner.CoinigyClient do
             Logger.info("Unknown Coinigy Ws event: #{unknown_event}")
             Logger.info("Coinigy Msg >>> #{msg}")
         end
+        {:ok, state}
       {:ok, %{ "data" => [data, _meta]}} ->
 
         # channels
@@ -98,12 +100,19 @@ defmodule CryptoScanner.CoinigyClient do
             CoinigyServer.set_ws_channels(data)
         end
 
+        {:ok, state}
+
+      {:ok, %{ "data" => %{ "isAuthenticated" => false}}} ->
+        api_key = System.get_env("COINIGY_API_KEY")
+        api_secret = System.get_env("COINIGY_API_SECRET")
+        reply_emit("auth", %{"apiKey" => api_key, "apiSecret" => api_secret}, state)
+
       {:ok, _} ->
           Logger.info("Message not relevant")
           Logger.info("Coinigy Msg >>> #{msg}")
-    end
 
-    {:ok, state}
+          {:ok, state}
+    end
   end
 
   def handle_publish(res) do
@@ -169,6 +178,7 @@ defmodule CryptoScanner.CoinigyClient do
 
   def terminate(reason, state) do
     Logger.info("Coinigy Ws Terminating: \n#{inspect reason}\n\n#{inspect state}\n")
+    CoinigyServer.ws_connect()
     exit(:normal)
   end
 

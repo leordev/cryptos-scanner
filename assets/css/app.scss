@@ -25,6 +25,8 @@ path.candle.down {
 @import "~bulma/sass/utilities/initial-variables";
 @import "~bulma/sass/utilities/functions";
 
+@import "./spacing.scss";
+
 // layout
 form {
   margin-bottom: 20px;

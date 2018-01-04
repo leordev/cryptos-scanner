@@ -54,7 +54,17 @@ defmodule CryptoScannerWeb.ScannerChannel do
 
         percent = if period do period["percentage"] else 0 end
 
-        if ((value < 0 && percent <= value) || (value > 0 && percent >= value)) && btc_volume >= volume do
+        period_minutes = case period_flag do
+          "3m" -> 3
+          "5m" -> 5
+          "10m" -> 10
+          "15m" -> 15
+          "30m" -> 30
+          _ -> 60
+        end
+        time_start = System.os_time - (period_minutes * 60 * 1000 * 1_000_000)
+
+        if ((value < 0 && percent <= value) || (value > 0 && percent >= value)) && btc_volume >= volume && c["last_trade_time"] >= time_start do
 
           { from, to, time } =
             if period["max"] > period["min"] do

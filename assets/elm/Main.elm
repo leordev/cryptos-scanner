@@ -18,6 +18,7 @@
 
 port module Main exposing (..)
 
+import Date.Distance as Distance
 import Date
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, defaultValue, href, placeholder, target, type_, value)
@@ -73,6 +74,7 @@ initialModel =
     , coinigySocketsConnected = False
     , transactionsBook = []
     , orderBook = []
+    , currentTime = 0
     }
 
 
@@ -175,6 +177,7 @@ type alias Model =
     , coinigySocketsConnected : Bool
     , transactionsBook : List Transaction
     , orderBook : List Order
+    , currentTime : Time.Time
     }
 
 
@@ -199,7 +202,7 @@ type alias Coin =
     , bidPrice : Float
     , askPrice : Float
     , percentage : Float
-    , time : String
+    , time : Time.Time
     , period3m : Maybe Period
     , period5m : Maybe Period
     , period10m : Maybe Period
@@ -412,6 +415,7 @@ subscriptions model =
             -- , receiveTrade (handleTrade model)
             -- , receiveOrder (handleOrder model)
             , newAlert AlertReceived
+            , Time.every Time.second Tick
             ]
     else
         Sub.none
@@ -442,6 +446,7 @@ type Msg
     | ResetFilter
     | DeleteError
     | ToggleSound
+    | Tick Time.Time
     | SetContent Content
     | Logout
 
@@ -460,6 +465,9 @@ removeNewCoins oldCoins newCoin =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        Tick time ->
+            ( { model | currentTime = time }, Cmd.none )
+
         CoinigySocketConnection isConnected ->
             ( { model | coinigySocketsConnected = isConnected }, Cmd.none )
 
@@ -798,69 +806,70 @@ stringToPeriod period =
             Period5m
 
 
-calcPercentages : List Coin -> List Coin -> List Coin
-calcPercentages coins history =
-    List.map
-        (\coin ->
-            let
-                currentDate =
-                    case Date.fromString coin.time of
-                        Ok date ->
-                            Date.toTime date
 
-                        Err _ ->
-                            0
-
-                calcPeriod period =
-                    let
-                        pastCoins =
-                            history
-                                |> List.filter
-                                    (\oldCoin ->
-                                        let
-                                            oldDate =
-                                                case Date.fromString oldCoin.time of
-                                                    Ok date ->
-                                                        Date.toTime date
-
-                                                    Err _ ->
-                                                        0
-                                        in
-                                            oldCoin.marketId == coin.marketId && (currentDate - oldDate) <= period
-                                    )
-
-                        minPrice =
-                            (coin :: pastCoins)
-                                |> List.map .to
-                                |> List.minimum
-                                |> Maybe.withDefault 0
-
-                        maxPrice =
-                            (coin :: pastCoins)
-                                |> List.map .to
-                                |> List.maximum
-                                |> Maybe.withDefault 0
-
-                        diffPrices =
-                            (maxPrice - minPrice) * -1
-
-                        percentagePrices =
-                            if abs (diffPrices) > 0 then
-                                ((minPrice / maxPrice) - 1) * 100
-                            else
-                                0
-                    in
-                        Just (Period minPrice maxPrice diffPrices percentagePrices)
-            in
-                { coin
-                    | period3m = calcPeriod (3 * Time.minute)
-                    , period5m = calcPeriod (5 * Time.minute)
-                    , period10m = calcPeriod (10 * Time.minute)
-                    , period15m = calcPeriod (15 * Time.minute)
-                    , period30m = calcPeriod (30 * Time.minute)
-                }
-        )
-        coins
+-- calcPercentages : List Coin -> List Coin -> List Coin
+-- calcPercentages coins history =
+--     List.map
+--         (\coin ->
+--             let
+--                 currentDate =
+--                     case Date.fromString coin.time of
+--                         Ok date ->
+--                             Date.toTime date
+--
+--                         Err _ ->
+--                             0
+--
+--                 calcPeriod period =
+--                     let
+--                         pastCoins =
+--                             history
+--                                 |> List.filter
+--                                     (\oldCoin ->
+--                                         let
+--                                             oldDate =
+--                                                 case Date.fromString oldCoin.time of
+--                                                     Ok date ->
+--                                                         Date.toTime date
+--
+--                                                     Err _ ->
+--                                                         0
+--                                         in
+--                                             oldCoin.marketId == coin.marketId && (currentDate - oldDate) <= period
+--                                     )
+--
+--                         minPrice =
+--                             (coin :: pastCoins)
+--                                 |> List.map .to
+--                                 |> List.minimum
+--                                 |> Maybe.withDefault 0
+--
+--                         maxPrice =
+--                             (coin :: pastCoins)
+--                                 |> List.map .to
+--                                 |> List.maximum
+--                                 |> Maybe.withDefault 0
+--
+--                         diffPrices =
+--                             (maxPrice - minPrice) * -1
+--
+--                         percentagePrices =
+--                             if abs (diffPrices) > 0 then
+--                                 ((minPrice / maxPrice) - 1) * 100
+--                             else
+--                                 0
+--                     in
+--                         Just (Period minPrice maxPrice diffPrices percentagePrices)
+--             in
+--                 { coin
+--                     | period3m = calcPeriod (3 * Time.minute)
+--                     , period5m = calcPeriod (5 * Time.minute)
+--                     , period10m = calcPeriod (10 * Time.minute)
+--                     , period15m = calcPeriod (15 * Time.minute)
+--                     , period30m = calcPeriod (30 * Time.minute)
+--                 }
+--         )
+--         coins
 
 
 handleResponseErrors : Model -> Http.Error -> String -> ( Model, Cmd Msg )
@@ -954,7 +963,7 @@ watchListCoinDecoder =
                     |> JDP.required "last_price" JD.string
                     |> JDP.required "current_volume" JD.string
                     |> JDP.required "btc_volume" JD.string
-                    |> JDP.required "server_time" JD.string
+                    |> JDP.required "server_time" JD.float
                     |> JDP.resolve
                 )
             )
@@ -1438,8 +1447,70 @@ setupModal model =
             cancelButton
 
 
-coinCard : Coin -> Filter -> Html Msg
-coinCard coin filter =
+exchangeUrl : Coin -> String
+exchangeUrl coin =
+    case coin.exchange of
+        "BINA" ->
+            "https://www.binance.com/trade.html?symbol="
+                ++ (coin.market
+                        |> String.split "/"
+                        |> String.join "_"
+                   )
+
+        "HITB" ->
+            "https://www.hitbtc.com/exchange/" ++ coin.base ++ "-to-" ++ coin.quote
+
+        "PLNX" ->
+            "https://poloniex.com/exchange#"
+                ++ (coin.market
+                        |> String.split "/"
+                        |> String.join "_"
+                   )
+
+        "LIQU" ->
+            "https://liqui.io/#/exchange/"
+                ++ (coin.market
+                        |> String.split "/"
+                        |> String.join "_"
+                   )
+
+        _ ->
+            "#"
+
+
+coinigyUrl : Coin -> String
+coinigyUrl coin =
+    "https://www.coinigy.com/main/markets/"
+        ++ coin.exchange
+        ++ "/"
+        ++ coin.base
+        ++ "/"
+        ++ coin.quote
+
+
+cryptoCompareUrl : Coin -> String
+cryptoCompareUrl coin =
+    "https://www.cryptocompare.com/coins/" ++ (String.toLower coin.base) ++ "/forum/" ++ coin.quote
+
+
+calcTimeDiff : Time.Time -> Time.Time -> String
+calcTimeDiff timeOld timeNew =
+    let
+        defaultConfig =
+            Distance.defaultConfig
+
+        config =
+            { defaultConfig | includeSeconds = True }
+
+        inWords =
+            config
+                |> Distance.inWordsWithConfig
+    in
+        inWords (Date.fromTime timeOld) (Date.fromTime timeNew)
+
+
+coinCard : Coin -> Filter -> Time.Time -> Html Msg
+coinCard coin filter currentTime =
     let
         pairName =
             coin.base ++ "/" ++ coin.quote
@@ -1449,46 +1520,6 @@ coinCard coin filter =
 
         percentage =
             toString coin.percentage ++ "% "
-
-        exchangeUrl =
-            case coin.exchange of
-                "BINA" ->
-                    "https://www.binance.com/trade.html?symbol="
-                        ++ (coin.market
-                                |> String.split "/"
-                                |> String.join "_"
-                           )
-
-                "HITB" ->
-                    "https://www.hitbtc.com/exchange/" ++ coin.base ++ "-to-" ++ coin.quote
-
-                "PLNX" ->
-                    "https://poloniex.com/exchange#"
-                        ++ (coin.market
-                                |> String.split "/"
-                                |> String.join "_"
-                           )
-
-                "LIQU" ->
-                    "https://liqui.io/#/exchange/"
-                        ++ (coin.market
-                                |> String.split "/"
-                                |> String.join "_"
-                           )
-
-                _ ->
-                    "#"
-
-        coinigyUrl =
-            "https://www.coinigy.com/main/markets/"
-                ++ coin.exchange
-                ++ "/"
-                ++ coin.base
-                ++ "/"
-                ++ coin.quote
-
-        cryptoCompare =
-            "https://www.cryptocompare.com/coins/" ++ coin.base ++ "/forum"
 
         ( titleColor, percentIcon ) =
             if coin.percentage < 0 then
@@ -1522,7 +1553,7 @@ coinCard coin filter =
                                 ]
                             , div [ class "level-right" ]
                                 [ div [ class "level-item" ]
-                                    [ small [ class "is-pulled-right" ] [ text "36s" ] ]
+                                    [ small [ class "is-pulled-right" ] [ text (calcTimeDiff coin.time currentTime) ] ]
                                 ]
                             ]
                         , nav [ class "level" ]
@@ -1582,23 +1613,29 @@ coinCard coin filter =
                     ]
                 , footer [ class "card-footer" ]
                     [ a
-                        [ href exchangeUrl
+                        [ href (exchangeUrl coin)
                         , target "_blank"
                         , class "card-footer-item"
                         ]
-                        [ text "Exchange" ]
+                        [ text "Exchange"
+                        , icon "exchange" False False
+                        ]
                     , a
-                        [ href coinigyUrl
+                        [ href (coinigyUrl coin)
                         , target "_blank"
                         , class "card-footer-item"
                         ]
-                        [ text "Coinigy" ]
+                        [ text "Coinigy"
+                        , icon "bar-chart" False False
+                        ]
                     , a
-                        [ href cryptoCompare
+                        [ href (cryptoCompareUrl coin)
                         , target "_blank"
                         , class "card-footer-item"
                         ]
-                        [ text "CryptoCompare" ]
+                        [ text "CryptoCompare"
+                        , icon "comments" False False
+                        ]
                     ]
                 ]
             ]
@@ -1781,32 +1818,65 @@ mainContent model =
                 ]
 
 
+reversedComparison a b =
+    case compare a b of
+        LT ->
+            GT
+
+        EQ ->
+            EQ
+
+        GT ->
+            LT
+
+
 historyContent : Model -> Html Msg
 historyContent model =
     table [ class "table is-striped is-hoverable is-fullwidth" ]
         [ thead []
             [ tr []
-                [ th [] [ text "Exchange" ]
-                , th [] [ text "Market" ]
-                , th [] [ text "BTC Volume" ]
+                [ th [] [ text "Market" ]
+                , th [] [ text "Volume" ]
                 , th [] [ text "Last Price" ]
                 , th [] [ text "Current Bid" ]
                 , th [] [ text "Current Ask" ]
-                , th [] [ text ("Diff %") ]
+                , th [] [ text ("From -> To (%)") ]
+                , th [] [ icon "clock" False False ]
                 ]
             ]
         , tbody []
             (model.history
+                |> List.sortWith (\a b -> reversedComparison a.time b.time)
                 |> List.map
                     (\item ->
                         tr []
-                            [ td [] [ text item.exchange ]
-                            , td [] [ text item.market ]
-                            , td [] [ text (toString item.btcVolume) ]
+                            [ td []
+                                [ text ("[" ++ item.exchange ++ "] " ++ item.market)
+                                , a
+                                    [ href (exchangeUrl item)
+                                    , target "_blank"
+                                    ]
+                                    [ icon "exchange" False False ]
+                                , a
+                                    [ href (coinigyUrl item)
+                                    , target "_blank"
+                                    ]
+                                    [ icon "bar-chart" False False ]
+                                , a
+                                    [ href (cryptoCompareUrl item)
+                                    , target "_blank"
+                                    ]
+                                    [ icon "comments" False False ]
+                                ]
+                            , td [] [ text (FormatNumber.format usLocale (abs item.btcVolume)) ]
                             , td [] [ text (toString item.to) ]
                             , td [] [ text (toString item.bidPrice) ]
                             , td [] [ text (toString item.askPrice) ]
-                            , td [] [ text ((FormatNumber.format usLocale (abs item.percentage)) ++ "%") ]
+                            , td []
+                                [ text ((toString item.from) ++ " -> " ++ (toString item.to) ++ " ")
+                                , small [] [ text ("(" ++ (FormatNumber.format usLocale item.percentage) ++ "%)") ]
+                                ]
+                            , td [] [ text (calcTimeDiff item.time model.currentTime) ]
                             ]
                     )
             )
@@ -1875,7 +1945,7 @@ watchListContent model =
                                 , td [] [ text (toString item.to) ]
                                 , td [] [ text (toString item.bidPrice) ]
                                 , td [] [ text (toString item.askPrice) ]
-                                , td [] [ text ((FormatNumber.format usLocale (abs percentage)) ++ "%") ]
+                                , td [] [ text ((FormatNumber.format usLocale percentage) ++ "%") ]
                                 ]
                     )
             )
@@ -1904,10 +1974,19 @@ scannerContent model =
                     (model.coins
                         |> List.sortBy .percentage
                         |> List.map
-                            (\c -> coinCard c filter)
+                            (\c -> coinCard c filter model.currentTime)
                     )
             else
                 p [] [ text "Go relax man! No scanner alerts... at least for now!" ]
+
+        history =
+            if List.length model.history > 0 then
+                div [ class "m-t-lg" ]
+                    [ h2 [ class "title is-3" ] [ text "History" ]
+                    , historyContent model
+                    ]
+            else
+                text ""
     in
         div []
             [ div [ class "has-text-right filter-link" ]
@@ -1916,8 +1995,7 @@ scannerContent model =
                     [ text filtering, icon "cog" False False ]
                 ]
             , content
-            , h2 [ class "title is-3" ] [ text "History" ]
-            , historyContent model
+            , history
             ]
 
 
