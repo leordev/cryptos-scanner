@@ -142,7 +142,7 @@ channel.join().receive("ok", function (resp) {
   console.log("Unable to join", resp);
 });
 
-channel.push("set_filter", { period: "5m", percentage: -4, volume: 2 });
+channel.push("set_filter", { period: "5m", percentage: -7, volume: 2 });
 
 channel.on("tick_alert", function (payload) {
   var coins = payload.coins.map(function (c) {
@@ -20458,10 +20458,11 @@ var _user$project$Main$scannerContent = function (model) {
 				return A3(_user$project$Main$coinCard, c, filter, model.currentTime);
 			},
 			A2(
-				_elm_lang$core$List$sortBy,
-				function (_) {
-					return _.percentage;
-				},
+				_elm_lang$core$List$sortWith,
+				F2(
+					function (a, b) {
+						return A2(_user$project$Main$reversedComparison, a.time, b.time);
+					}),
 				model.coins))) : A2(
 		_elm_lang$html$Html$p,
 		{ctor: '[]'},

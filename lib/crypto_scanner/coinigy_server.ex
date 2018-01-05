@@ -40,11 +40,6 @@ defmodule CryptoScanner.CoinigyServer do
     {:ok, state}
   end
 
-  # def handle_info(:ws_auth, state) do
-  #   CoinigyClient.auth(state.ws_client, System.get_env("COINIGY_API_KEY"), System.get_env("COINIGY_API_SECRET"))
-  #   {:noreply, state}
-  # end
-
   def handle_info(:ws_default_subs, state) do
     CoinigyClient.setup_default_channels()
     {:noreply, state}
@@ -101,14 +96,6 @@ defmodule CryptoScanner.CoinigyServer do
 
   def get_available_channels() do
     GenServer.call(:coinigy, :get_available_channels)
-  end
-
-  # def get_hot(period, percentage) do
-  #   GenServer.call(:coinigy, {:get_hot, period, percentage})
-  # end
-
-  def pong_ws_client(pid, ping) do
-    GenServer.cast(pid, {:pong_ws_client, ping})
   end
 
   def set_auth_ws_client(pid, token) do
@@ -186,36 +173,6 @@ defmodule CryptoScanner.CoinigyServer do
     end)
   end
 
-
-  # def handle_call({:get_hot, period, value}, _from, state) do
-  #   coins =
-  #     state.coins
-  #     |> Enum.filter(fn c ->
-  #       percent = c["period_" <> period]["percentage"]
-  #       (value < 0 && percent <= value) || (value > 0 && percent >= value)
-  #     end)
-  #     |> Enum.map(fn c ->
-  #       period = c["period_" <> period]
-  #
-  #       [ base, quote ] = String.split(c["label"])
-  #
-  #       %Coin{
-  #         exchange: c["exchange"],
-  #         symbol: c["label"],
-  #         base: base,
-  #         quote: quote,
-  #         volume: c["volume_btc"],
-  #         bidPrice: c["bid_price"],
-  #         askPrice: c["ask_price"],
-  #         from: period["max"],
-  #         to: period["min"],
-  #         percentage: period["percentage"]
-  #       }
-  #     end)
-  #
-  #   {:reply, {:ok, coins}, state}
-  # end
-
   def handle_cast({:pong_ws_client, ping}, state) do
     CoinigyClient.pong(state.ws_client, ping)
     {:noreply, state}
@@ -246,7 +203,7 @@ defmodule CryptoScanner.CoinigyServer do
         # keeps only 30m of price data
         current_prices = coin["prices"]
           |> Enum.filter(fn i -> i["time"] >= last_30m end)
-        # TODO: should I aggregate data as minutes candlesticks?
+        # TODO: should I aggregate data as candle
 
         new_prices = [ raw_price | current_prices ]
 

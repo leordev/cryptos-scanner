@@ -1972,7 +1972,7 @@ scannerContent model =
                 div
                     [ class "columns is-multiline" ]
                     (model.coins
-                        |> List.sortBy .percentage
+                        |> List.sortWith (\a b -> reversedComparison a.time b.time)
                         |> List.map
                             (\c -> coinCard c filter model.currentTime)
                     )

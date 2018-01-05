@@ -13,8 +13,13 @@ defmodule CryptoScanner.CryptoCompare do
 
       %{body: body} ->
         Logger.info("Received body: #{inspect(body)}")
-        {:ok, %{"BTC" => %{"USD" => btc}, "ETH" => %{"USD" => eth}}} = Poison.decode(body)
-        {:ok, btc, eth}
+        case Poison.decode(body) do
+          {:ok, %{"BTC" => %{"USD" => btc}, "ETH" => %{"USD" => eth}}} ->
+            {:ok, btc, eth}
+          wrong_res ->
+            Logger.info("Ignoring wrong body #{inspect(wrong_res)}")
+            {:error, "Ignoring wrong body"}
+        end
       _ ->
         {:error, "Unknown update price error"}
     end
