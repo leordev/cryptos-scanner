@@ -1,21 +1,3 @@
--- module Main exposing (..)
---
--- import Html exposing (Html)
--- import App.Types exposing (Model, Msg(..))
--- import App.State exposing (init, update, subscriptions)
--- import App.View exposing (root)
---
---
--- main : Program Never Model Msg
--- main =
---     Html.program
---         { init = init
---         , view = root
---         , update = update
---         , subscriptions = subscriptions
---         }
-
-
 port module Main exposing (..)
 
 import Date.Distance as Distance
@@ -29,12 +11,6 @@ import Json.Decode.Pipeline as JDP
 import FormatNumber
 import FormatNumber.Locales exposing (usLocale)
 import Time
-
-
--- import Date
--- import Date.Extra.Format as DateFormat
--- import Date.Extra.Config.Config_en_us as DateConfig
--- initialization
 
 
 init : Flags -> ( Model, Cmd Msg )
@@ -92,7 +68,7 @@ initModel flags =
 
 initialFilter : Filter
 initialFilter =
-    { volume = 10, period = Period5m, percentage = -4 }
+    { volume = 1, period = Period5m, percentage = -10 }
 
 
 main : Program Flags Model Msg
@@ -254,6 +230,9 @@ port saveExchanges : Flags -> Cmd msg
 
 
 port deleteUser : () -> Cmd msg
+
+
+port alarmAudio : () -> Cmd msg
 
 
 port startSockets : { user : User, exchanges : List Coin } -> Cmd msg
@@ -428,7 +407,6 @@ subscriptions model =
 type Msg
     = AlertReceived (List Coin)
     | CoinigyFailReceived String
-    | OrdersReceived (List Order)
     | UpdateVolume String
     | UpdatePercentage String
     | UpdatePeriod String
@@ -480,39 +458,6 @@ update msg model =
         DeleteError ->
             ( { model | error = Nothing }, Cmd.none )
 
-        OrdersReceived ordersList ->
-            case List.head ordersList of
-                Just order ->
-                    let
-                        bidPrice =
-                            ordersList
-                                |> List.filter (\o -> o.tradeType == Buy)
-                                |> List.map .price
-                                |> List.maximum
-                                |> Maybe.withDefault 0.0
-
-                        askPrice =
-                            ordersList
-                                |> List.filter (\o -> o.tradeType == Sell)
-                                |> List.map .price
-                                |> List.minimum
-                                |> Maybe.withDefault 0.0
-
-                        newMarket =
-                            model.watchMarkets
-                                |> List.map
-                                    (\m ->
-                                        if m.marketId == order.marketId then
-                                            { m | bidPrice = bidPrice, askPrice = askPrice }
-                                        else
-                                            m
-                                    )
-                    in
-                        ( { model | watchMarkets = newMarket }, Cmd.none )
-
-                Nothing ->
-                    ( model, Cmd.none )
-
         CoinigyFailReceived error ->
             ( { model
                 | error =
@@ -563,6 +508,14 @@ update msg model =
                 updatedCoins =
                     coins
 
+                playAlarm =
+                    not model.isMuted
+                        && (updatedCoins
+                                |> List.filter (\i -> i.time <= (model.currentTime + Time.second * 6))
+                                |> List.length
+                                |> (>) 0
+                           )
+
                 countCoins =
                     updatedCoins |> List.length
 
@@ -576,7 +529,10 @@ update msg model =
                         title
 
                 cmd =
-                    setTitle newTitle
+                    if playAlarm then
+                        Cmd.batch [ setTitle newTitle, alarmAudio () ]
+                    else
+                        setTitle newTitle
             in
                 ( { model | coins = updatedCoins, history = newHistory }, cmd )
 

@@ -101,6 +101,9 @@ var flags = !storageBody ? { user: {
 var Elm = __webpack_require__(5);
 var app = Elm.Main.fullscreen(flags);
 
+var alarmAudio = new Audio('alarm-frenzy.mp3');
+alarmAudio.play();
+
 app.ports.saveUser.subscribe(function (user) {
   var data = { user: user, exchanges: [] };
   console.log("saving user data ", data);
@@ -116,6 +119,10 @@ app.ports.saveExchanges.subscribe(function (flags) {
 
 app.ports.deleteUser.subscribe(function () {
   localStorage.removeItem(STORAGE_KEY);
+});
+
+app.ports.alarmAudio.subscribe(function () {
+  alarmAudio.play();
 });
 
 app.ports.setTitle.subscribe(function (title) {
@@ -142,7 +149,7 @@ channel.join().receive("ok", function (resp) {
   console.log("Unable to join", resp);
 });
 
-channel.push("set_filter", { period: "5m", percentage: -7, volume: 2 });
+channel.push("set_filter", { period: "5m", percentage: -10, volume: 1 });
 
 channel.on("tick_alert", function (payload) {
   var coins = payload.coins.map(function (c) {
@@ -19028,6 +19035,11 @@ var _user$project$Main$deleteUser = _elm_lang$core$Native_Platform.outgoingPort(
 	function (v) {
 		return null;
 	});
+var _user$project$Main$alarmAudio = _elm_lang$core$Native_Platform.outgoingPort(
+	'alarmAudio',
+	function (v) {
+		return null;
+	});
 var _user$project$Main$startSockets = _elm_lang$core$Native_Platform.outgoingPort(
 	'startSockets',
 	function (v) {
@@ -19605,7 +19617,7 @@ var _user$project$Main$Period30m = {ctor: 'Period30m'};
 var _user$project$Main$Period15m = {ctor: 'Period15m'};
 var _user$project$Main$Period10m = {ctor: 'Period10m'};
 var _user$project$Main$Period5m = {ctor: 'Period5m'};
-var _user$project$Main$initialFilter = {volume: 10, period: _user$project$Main$Period5m, percentage: -4};
+var _user$project$Main$initialFilter = {volume: 1, period: _user$project$Main$Period5m, percentage: -10};
 var _user$project$Main$initialModel = {
 	coins: {ctor: '[]'},
 	history: {ctor: '[]'},
@@ -19757,58 +19769,6 @@ var _user$project$Main$update = F2(
 						{error: _elm_lang$core$Maybe$Nothing}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			case 'OrdersReceived':
-				var _p23 = _p21._0;
-				var _p22 = _elm_lang$core$List$head(_p23);
-				if (_p22.ctor === 'Just') {
-					var askPrice = A2(
-						_elm_lang$core$Maybe$withDefault,
-						0.0,
-						_elm_lang$core$List$minimum(
-							A2(
-								_elm_lang$core$List$map,
-								function (_) {
-									return _.price;
-								},
-								A2(
-									_elm_lang$core$List$filter,
-									function (o) {
-										return _elm_lang$core$Native_Utils.eq(o.tradeType, _user$project$Main$Sell);
-									},
-									_p23))));
-					var bidPrice = A2(
-						_elm_lang$core$Maybe$withDefault,
-						0.0,
-						_elm_lang$core$List$maximum(
-							A2(
-								_elm_lang$core$List$map,
-								function (_) {
-									return _.price;
-								},
-								A2(
-									_elm_lang$core$List$filter,
-									function (o) {
-										return _elm_lang$core$Native_Utils.eq(o.tradeType, _user$project$Main$Buy);
-									},
-									_p23))));
-					var newMarket = A2(
-						_elm_lang$core$List$map,
-						function (m) {
-							return _elm_lang$core$Native_Utils.eq(m.marketId, _p22._0.marketId) ? _elm_lang$core$Native_Utils.update(
-								m,
-								{bidPrice: bidPrice, askPrice: askPrice}) : m;
-						},
-						model.watchMarkets);
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{watchMarkets: newMarket}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				} else {
-					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-				}
 			case 'CoinigyFailReceived':
 				return {
 					ctor: '_Tuple2',
@@ -19821,9 +19781,22 @@ var _user$project$Main$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'AlertReceived':
-				var _p24 = _p21._0;
+				var _p22 = _p21._0;
 				var title = 'CryptoTradingBuddy';
-				var updatedCoins = _p24;
+				var updatedCoins = _p22;
+				var playAlarm = (!model.isMuted) && A2(
+					F2(
+						function (x, y) {
+							return _elm_lang$core$Native_Utils.cmp(x, y) > 0;
+						}),
+					0,
+					_elm_lang$core$List$length(
+						A2(
+							_elm_lang$core$List$filter,
+							function (i) {
+								return _elm_lang$core$Native_Utils.cmp(i.time, model.currentTime + (_elm_lang$core$Time$second * 6)) < 1;
+							},
+							updatedCoins)));
 				var countCoins = _elm_lang$core$List$length(updatedCoins);
 				var newTitle = (_elm_lang$core$Native_Utils.cmp(countCoins, 0) > 0) ? A2(
 					_elm_lang$core$Basics_ops['++'],
@@ -19832,7 +19805,17 @@ var _user$project$Main$update = F2(
 						_elm_lang$core$Basics_ops['++'],
 						_elm_lang$core$Basics$toString(countCoins),
 						A2(_elm_lang$core$Basics_ops['++'], ') ', title))) : title;
-				var cmd = _user$project$Main$setTitle(newTitle);
+				var cmd = playAlarm ? _elm_lang$core$Platform_Cmd$batch(
+					{
+						ctor: '::',
+						_0: _user$project$Main$setTitle(newTitle),
+						_1: {
+							ctor: '::',
+							_0: _user$project$Main$alarmAudio(
+								{ctor: '_Tuple0'}),
+							_1: {ctor: '[]'}
+						}
+					}) : _user$project$Main$setTitle(newTitle);
 				var oldCoins = A2(
 					_elm_lang$core$List$filter,
 					function (i) {
@@ -19850,7 +19833,7 @@ var _user$project$Main$update = F2(
 									},
 									model.coins)));
 					},
-					_p24);
+					_p22);
 				var history = A2(
 					_elm_lang$core$List$map,
 					function (i) {
@@ -20123,9 +20106,9 @@ var _user$project$Main$ToggleSetup = function (a) {
 };
 var _user$project$Main$setupModal = function (model) {
 	var userData = model.user;
-	var _p25 = function () {
-		var _p26 = model.setupStep;
-		switch (_p26.ctor) {
+	var _p23 = function () {
+		var _p24 = model.setupStep;
+		switch (_p24.ctor) {
 			case 'UserSetup':
 				return {
 					ctor: '_Tuple3',
@@ -20208,9 +20191,9 @@ var _user$project$Main$setupModal = function (model) {
 				};
 		}
 	}();
-	var formContent = _p25._0;
-	var submitButton = _p25._1;
-	var cancelButton = _p25._2;
+	var formContent = _p23._0;
+	var submitButton = _p23._1;
+	var cancelButton = _p23._2;
 	return A6(
 		_user$project$Main$modalCard,
 		model,
@@ -20578,8 +20561,8 @@ var _user$project$Main$mainContent = function (model) {
 			});
 	} else {
 		var content = function () {
-			var _p27 = model.content;
-			switch (_p27.ctor) {
+			var _p25 = model.content;
+			switch (_p25.ctor) {
 				case 'MarketWatch':
 					return _user$project$Main$watchListContent(model);
 				case 'DaytradeScanner':
@@ -20994,9 +20977,6 @@ var _user$project$Main$view = function (model) {
 			}
 		});
 };
-var _user$project$Main$OrdersReceived = function (a) {
-	return {ctor: 'OrdersReceived', _0: a};
-};
 var _user$project$Main$CoinigyFailReceived = function (a) {
 	return {ctor: 'CoinigyFailReceived', _0: a};
 };
@@ -21091,7 +21071,7 @@ var _user$project$Main$main = _elm_lang$html$Html$programWithFlags(
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
 if (typeof _user$project$Main$main !== 'undefined') {
-    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"unions":{"Dict.LeafColor":{"args":[],"tags":{"LBBlack":[],"LBlack":[]}},"Main.SetupStep":{"args":[],"tags":{"ExchangesSetup":[],"None":[],"UserSetup":[]}},"Main.TradeType":{"args":[],"tags":{"Sell":[],"Buy":[]}},"Dict.Dict":{"args":["k","v"],"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Main.Content":{"args":[],"tags":{"BaseCracker":[],"MarketWatch":[],"ActiveTrades":[],"MyReports":[],"DaytradeScanner":[]}},"Main.Msg":{"args":[],"tags":{"Logout":[],"UpdateCoinigyKey":["String"],"Tick":["Time.Time"],"ToggleSetup":["Main.SetupStep"],"ResetFilter":[],"SetContent":["Main.Content"],"ShowFilter":[],"ExchangesResponse":["Result.Result Http.Error (List Main.Exchange)"],"UserKeysResponse":["Result.Result Http.Error Main.User"],"ToggleSound":[],"UpdatePercentage":["String"],"DeleteError":[],"UpdateCoinigyChannelKey":["String"],"CoinigyFailReceived":["String"],"UpdatePeriod":["String"],"CoinigySocketConnection":["Bool"],"UpdateUserSetup":[],"SetFilter":[],"OrdersReceived":["List Main.Order"],"UpdateCoinigySecret":["String"],"AlertReceived":["List Main.Coin"],"UpdateVolume":["String"]}},"Dict.NColor":{"args":[],"tags":{"BBlack":[],"Red":[],"NBlack":[],"Black":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String"],"NetworkError":[],"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}}},"aliases":{"Main.User":{"args":[],"type":"{ id : String , email : String , name : String , apiKey : String , apiSecret : String , apiChannelKey : String }"},"Http.Response":{"args":["body"],"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }"},"Main.Period":{"args":[],"type":"{ min : Float, max : Float, diff : Float, percentage : Float }"},"Main.Order":{"args":[],"type":"{ tradeType : Main.TradeType , price : Float , quantity : Float , time : String , marketId : String }"},"Main.Coin":{"args":[],"type":"{ exchange : String , marketId : String , base : String , quote : String , market : String , from : Float , to : Float , lastPrice : Float , volume : Float , btcVolume : Float , bidPrice : Float , askPrice : Float , percentage : Float , time : Time.Time , period3m : Maybe.Maybe Main.Period , period5m : Maybe.Maybe Main.Period , period10m : Maybe.Maybe Main.Period , period15m : Maybe.Maybe Main.Period , period30m : Maybe.Maybe Main.Period }"},"Time.Time":{"args":[],"type":"Float"},"Main.Exchange":{"args":[],"type":"{ id : String, code : String, name : String }"}},"message":"Main.Msg"},"versions":{"elm":"0.18.0"}});
+    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"unions":{"Dict.LeafColor":{"args":[],"tags":{"LBBlack":[],"LBlack":[]}},"Main.SetupStep":{"args":[],"tags":{"ExchangesSetup":[],"None":[],"UserSetup":[]}},"Dict.Dict":{"args":["k","v"],"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Main.Content":{"args":[],"tags":{"BaseCracker":[],"MarketWatch":[],"ActiveTrades":[],"MyReports":[],"DaytradeScanner":[]}},"Main.Msg":{"args":[],"tags":{"Logout":[],"UpdateCoinigyKey":["String"],"Tick":["Time.Time"],"ToggleSetup":["Main.SetupStep"],"ResetFilter":[],"SetContent":["Main.Content"],"ShowFilter":[],"ExchangesResponse":["Result.Result Http.Error (List Main.Exchange)"],"UserKeysResponse":["Result.Result Http.Error Main.User"],"ToggleSound":[],"UpdatePercentage":["String"],"DeleteError":[],"UpdateCoinigyChannelKey":["String"],"CoinigyFailReceived":["String"],"UpdatePeriod":["String"],"CoinigySocketConnection":["Bool"],"UpdateUserSetup":[],"SetFilter":[],"UpdateCoinigySecret":["String"],"AlertReceived":["List Main.Coin"],"UpdateVolume":["String"]}},"Dict.NColor":{"args":[],"tags":{"BBlack":[],"Red":[],"NBlack":[],"Black":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String"],"NetworkError":[],"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}}},"aliases":{"Main.User":{"args":[],"type":"{ id : String , email : String , name : String , apiKey : String , apiSecret : String , apiChannelKey : String }"},"Http.Response":{"args":["body"],"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }"},"Main.Period":{"args":[],"type":"{ min : Float, max : Float, diff : Float, percentage : Float }"},"Main.Coin":{"args":[],"type":"{ exchange : String , marketId : String , base : String , quote : String , market : String , from : Float , to : Float , lastPrice : Float , volume : Float , btcVolume : Float , bidPrice : Float , askPrice : Float , percentage : Float , time : Time.Time , period3m : Maybe.Maybe Main.Period , period5m : Maybe.Maybe Main.Period , period10m : Maybe.Maybe Main.Period , period15m : Maybe.Maybe Main.Period , period30m : Maybe.Maybe Main.Period }"},"Time.Time":{"args":[],"type":"Float"},"Main.Exchange":{"args":[],"type":"{ id : String, code : String, name : String }"}},"message":"Main.Msg"},"versions":{"elm":"0.18.0"}});
 }
 
 if (typeof define === "function" && define['amd'])

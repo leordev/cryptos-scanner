@@ -21,6 +21,9 @@ const flags = !storageBody ?
 const Elm = require("../elm/Main");
 const app = Elm.Main.fullscreen(flags);
 
+const alarmAudio = new Audio('alarm-frenzy.mp3');
+alarmAudio.play();
+
 app.ports.saveUser.subscribe(function(user){
   const data = { user: user, exchanges: [] }
   console.log("saving user data ", data)
@@ -36,6 +39,10 @@ app.ports.saveExchanges.subscribe(function(flags){
 
 app.ports.deleteUser.subscribe(function(){
   localStorage.removeItem(STORAGE_KEY);
+});
+
+app.ports.alarmAudio.subscribe(function() {
+  alarmAudio.play();
 });
 
 app.ports.setTitle.subscribe(function(title) {
@@ -60,7 +67,7 @@ channel.join()
   .receive("ok", resp => { console.log("Joined successfully") })
   .receive("error", resp => { console.log("Unable to join", resp) })
 
-channel.push("set_filter", { period: "5m", percentage: -7, volume: 2})
+channel.push("set_filter", { period: "5m", percentage: -10, volume: 1})
 
 channel.on("tick_alert", payload => {
   const coins = payload.coins.map(c => {
