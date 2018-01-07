@@ -149,7 +149,7 @@ channel.join().receive("ok", function (resp) {
   console.log("Unable to join", resp);
 });
 
-channel.push("set_filter", { period: "5m", percentage: -10, volume: 1 });
+channel.push("set_filter", { period: "5m", percentage: -5, volume: 1 });
 
 channel.on("tick_alert", function (payload) {
   var coins = payload.coins.map(function (c) {
@@ -19787,14 +19787,14 @@ var _user$project$Main$update = F2(
 				var playAlarm = (!model.isMuted) && A2(
 					F2(
 						function (x, y) {
-							return _elm_lang$core$Native_Utils.cmp(x, y) > 0;
+							return _elm_lang$core$Native_Utils.cmp(x, y) < 0;
 						}),
 					0,
 					_elm_lang$core$List$length(
 						A2(
 							_elm_lang$core$List$filter,
 							function (i) {
-								return _elm_lang$core$Native_Utils.cmp(i.time, model.currentTime + (_elm_lang$core$Time$second * 6)) < 1;
+								return _elm_lang$core$Native_Utils.cmp(i.time, model.currentTime - (_elm_lang$core$Time$second * 6)) > -1;
 							},
 							updatedCoins)));
 				var countCoins = _elm_lang$core$List$length(updatedCoins);

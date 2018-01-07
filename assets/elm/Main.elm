@@ -511,9 +511,16 @@ update msg model =
                 playAlarm =
                     not model.isMuted
                         && (updatedCoins
-                                |> List.filter (\i -> i.time <= (model.currentTime + Time.second * 6))
+                                |> List.filter
+                                    (\i ->
+                                        i.time
+                                            >= (model.currentTime
+                                                    - Time.second
+                                                    * 6
+                                               )
+                                    )
                                 |> List.length
-                                |> (>) 0
+                                |> (<) 0
                            )
 
                 countCoins =
@@ -577,7 +584,12 @@ update msg model =
                 ( { model | filter = newFilter }, Cmd.none )
 
         ShowFilter ->
-            ( { model | showFilter = True, oldFilter = Just model.filter }, Cmd.none )
+            ( { model
+                | showFilter = True
+                , oldFilter = Just model.filter
+              }
+            , Cmd.none
+            )
 
         ToggleSetup step ->
             ( { model | setupStep = step }, Cmd.none )
