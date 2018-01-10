@@ -37,7 +37,7 @@ environment :prod do
   set include_erts: true
   set include_src: false
   set cookie: :"B<zhMp[(.cQsb(P}P{Z:xmR!82gc^tzLZ=fI1|<e%|&zV>F;M4[kA[D/qDw>~XO)"
-  iset output_dir: "rel/cryptotradingbuddy"
+  set output_dir: "rel/ctb"
 end
 
 # You may define one or more releases in this file.
@@ -51,4 +51,3 @@ release :crypto_scanner do
     :runtime_tools
   ]
 end
-
