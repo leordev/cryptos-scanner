@@ -21,8 +21,7 @@ const flags = !storageBody ?
 const Elm = require("../elm/Main");
 const app = Elm.Main.fullscreen(flags);
 
-const alarmAudio = new Audio('alarms/compra-marcelindo.m4a');
-alarmAudio.play();
+const alarmAudio = new Audio('alarms/notification.wav');
 
 app.ports.saveUser.subscribe(function(user){
   const data = { user: user, exchanges: [] }
@@ -51,10 +50,10 @@ app.ports.setTitle.subscribe(function(title) {
   }
 })
 
-// app.ports.setFilter.subscribe(filter => {
-//   console.log("Setting filter >>>>> ", filter)
-//   channel.push("set_filter", filter)
-// })
+app.ports.setFilter.subscribe(filter => {
+  console.log("Setting filter >>>>> ", filter)
+  channel.push("set_filter", filter)
+})
 
 // app ports for elm and/or business logic
 const socket = new Socket("/socket")

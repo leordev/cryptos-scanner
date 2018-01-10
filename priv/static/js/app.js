@@ -101,7 +101,7 @@ var flags = !storageBody ? { user: {
 var Elm = __webpack_require__(5);
 var app = Elm.Main.fullscreen(flags);
 
-var alarmAudio = new Audio('alarms/compra-marcelindo.m4a');
+var alarmAudio = new Audio('alarms/notification.wav');
 alarmAudio.play();
 
 app.ports.saveUser.subscribe(function (user) {
@@ -131,10 +131,10 @@ app.ports.setTitle.subscribe(function (title) {
   }
 });
 
-// app.ports.setFilter.subscribe(filter => {
-//   console.log("Setting filter >>>>> ", filter)
-//   channel.push("set_filter", filter)
-// })
+app.ports.setFilter.subscribe(function (filter) {
+  console.log("Setting filter >>>>> ", filter);
+  channel.push("set_filter", filter);
+});
 
 // app ports for elm and/or business logic
 var socket = new _phoenix.Socket("/socket");
