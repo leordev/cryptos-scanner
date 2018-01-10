@@ -32,6 +32,8 @@ defmodule CryptoScanner.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:edeliver, "~> 1.4.3"},
+      {:distillery, "~> 1.4"},
       {:websockex, "~> 0.4.0"},
       {:httpotion, "~> 3.0.2"},
       {:cors_plug, "~> 1.2"},

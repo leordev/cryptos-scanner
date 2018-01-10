@@ -1,0 +1,18 @@
+APP="cryptotradingbuddy"
+
+BUILD_HOST="e38c4f56-b9ad-4bb5-b167-bed9b6cf3df4.pub.cloud.scaleway.com"
+BUILD_USER="leo"
+BUILD_AT="/home/leo/ctb_build"
+
+PRODUCTION_HOSTS="e38c4f56-b9ad-4bb5-b167-bed9b6cf3df4.pub.cloud.scaleway.com"
+PRODUCTION_USER="leo"
+DELIVER_TO="/home/leo/ctb_release"
+
+pre_erlang_get_and_update_deps() {
+  local _prod_secret_path="/home/leo/ctb_config/prod.secret.exs"
+  if [ "$TARGET_MIX_ENV" = "prod" ]; then
+    __sync_remote "
+      ln -sfn '$_prod_secret_path' '$BUILD_AT/config/prod.secret.exs'
+    "
+  fi
+}

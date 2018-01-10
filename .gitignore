@@ -20,3 +20,5 @@ node_modules
 elm-stuff
 
 .env
+.ssh
+.deliver/releases/
