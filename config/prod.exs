@@ -15,8 +15,8 @@ use Mix.Config
 # which you typically run after static files are built.
 config :crypto_scanner, CryptoScannerWeb.Endpoint,
   load_from_system_env: true,
-  http: [port: 4090],
-  url: [host: "e38c4f56-b9ad-4bb5-b167-bed9b6cf3df4.pub.cloud.scaleway.com", port: 4090],
+  http: [port: 4000],
+  url: [host: "e38c4f56-b9ad-4bb5-b167-bed9b6cf3df4.pub.cloud.scaleway.com", port: 4000],
   server: true,
   cache_static_manifest: "priv/static/cache_manifest.json"
 
