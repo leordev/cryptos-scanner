@@ -101,7 +101,7 @@ var flags = !storageBody ? { user: {
 var Elm = __webpack_require__(5);
 var app = Elm.Main.fullscreen(flags);
 
-var alarmAudio = new Audio('alarm-frenzy.mp3');
+var alarmAudio = new Audio('alarms/compra-marcelindo.m4a');
 alarmAudio.play();
 
 app.ports.saveUser.subscribe(function (user) {
@@ -149,7 +149,7 @@ channel.join().receive("ok", function (resp) {
   console.log("Unable to join", resp);
 });
 
-channel.push("set_filter", { period: "5m", percentage: -5, volume: 1 });
+channel.push("set_filter", { period: "5m", percentage: -9, volume: 1 });
 
 channel.on("tick_alert", function (payload) {
   var coins = payload.coins.map(function (c) {
