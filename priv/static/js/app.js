@@ -102,7 +102,6 @@ var Elm = __webpack_require__(5);
 var app = Elm.Main.fullscreen(flags);
 
 var alarmAudio = new Audio('alarms/notification.wav');
-alarmAudio.play();
 
 app.ports.saveUser.subscribe(function (user) {
   var data = { user: user, exchanges: [] };
@@ -19081,6 +19080,11 @@ var _user$project$Main$notifySound = _elm_lang$core$Native_Platform.outgoingPort
 	function (v) {
 		return v;
 	});
+var _user$project$Main$setFilter = _elm_lang$core$Native_Platform.outgoingPort(
+	'setFilter',
+	function (v) {
+		return v;
+	});
 var _user$project$Main$newAlert = _elm_lang$core$Native_Platform.incomingPort(
 	'newAlert',
 	_elm_lang$core$Json_Decode$list(
@@ -19959,12 +19963,40 @@ var _user$project$Main$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'SetFilter':
+				var filter = model.filter;
+				var filterObj = _elm_lang$core$Json_Encode$object(
+					{
+						ctor: '::',
+						_0: {
+							ctor: '_Tuple2',
+							_0: 'period',
+							_1: _elm_lang$core$Json_Encode$string(
+								_user$project$Main$periodToString(filter.period))
+						},
+						_1: {
+							ctor: '::',
+							_0: {
+								ctor: '_Tuple2',
+								_0: 'percentage',
+								_1: _elm_lang$core$Json_Encode$int(filter.percentage)
+							},
+							_1: {
+								ctor: '::',
+								_0: {
+									ctor: '_Tuple2',
+									_0: 'volume',
+									_1: _elm_lang$core$Json_Encode$int(filter.volume)
+								},
+								_1: {ctor: '[]'}
+							}
+						}
+					});
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{oldFilter: _elm_lang$core$Maybe$Nothing, showFilter: false}),
-					_1: _elm_lang$core$Platform_Cmd$none
+					_1: _user$project$Main$setFilter(filterObj)
 				};
 			case 'ToggleSound':
 				return {

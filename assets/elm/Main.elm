@@ -6,6 +6,7 @@ import Html exposing (..)
 import Html.Attributes exposing (attribute, class, defaultValue, href, placeholder, target, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
+import Json.Encode as JE
 import Json.Decode as JD
 import Json.Decode.Pipeline as JDP
 import FormatNumber
@@ -244,8 +245,7 @@ port setTitle : String -> Cmd msg
 port notifySound : String -> Cmd msg
 
 
-
--- port setFilter : Va -> Cmd msg
+port setFilter : JD.Value -> Cmd msg
 
 
 port newAlert : (List Coin -> msg) -> Sub msg
@@ -604,9 +604,20 @@ update msg model =
             )
 
         SetFilter ->
-            ( { model | oldFilter = Nothing, showFilter = False }
-            , Cmd.none
-            )
+            let
+                filter =
+                    model.filter
+
+                filterObj =
+                    JE.object
+                        [ ( "period", JE.string (periodToString filter.period) )
+                        , ( "percentage", JE.int filter.percentage )
+                        , ( "volume", JE.int filter.volume )
+                        ]
+            in
+                ( { model | oldFilter = Nothing, showFilter = False }
+                , setFilter filterObj
+                )
 
         ToggleSound ->
             ( { model | isMuted = not model.isMuted }, Cmd.none )
