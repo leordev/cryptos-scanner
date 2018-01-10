@@ -1,4 +1,4 @@
-APP="cryptotradingbuddy"
+APP="crypto_scanner"
 
 BUILD_HOST="e38c4f56-b9ad-4bb5-b167-bed9b6cf3df4.pub.cloud.scaleway.com"
 BUILD_USER="leo"
