@@ -4,8 +4,6 @@ BUILD_HOST="e38c4f56-b9ad-4bb5-b167-bed9b6cf3df4.pub.cloud.scaleway.com"
 BUILD_USER="leo"
 BUILD_AT="/home/leo/ctb_build"
 
-RELEASE_DIR="/home/leo/ctb_build/_build/prod/rel/$APP"
-
 PRODUCTION_HOSTS="e38c4f56-b9ad-4bb5-b167-bed9b6cf3df4.pub.cloud.scaleway.com"
 PRODUCTION_USER="leo"
 DELIVER_TO="/home/leo/ctb_release"
