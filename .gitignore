@@ -22,3 +22,7 @@ elm-stuff
 .env
 .ssh
 .deliver/releases/
+
+config/prod.secret.exs
+
+logs
