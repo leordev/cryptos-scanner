@@ -73,7 +73,7 @@ defmodule CryptoScannerWeb.ScannerChannel do
               { period["min"], period["max"], period["max_time"] }
             end
 
-          Logger.info("[#{c["exchange"]}] Current coin #{c["label"]} went from #{from} to #{to} and has a BTC volume of #{btc_volume} for the current period of #{period_flag} -- Last Price: #{c["last_price"]}")
+          Logger.info("[#{c["exchange"]}] #{c["label"]} | #{from} > #{to} | #{percent}% | #{btc_volume} BTC Vol | LAST: #{c["last_price"]} | #{period_flag}")
 
           [ %Coin{
             exchange: c["exchange"],

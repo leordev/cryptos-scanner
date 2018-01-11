@@ -40,11 +40,6 @@ defmodule CryptoScanner.CoinigyServer do
     {:ok, state}
   end
 
-  def handle_info(:ws_default_subs, state) do
-    CoinigyClient.setup_default_channels()
-    {:noreply, state}
-  end
-
   def handle_info(:ws_connect, state) do
     {:ok, ws_client} = CoinigyClient.start_link()
     {:noreply, %{ state | ws_client: ws_client }}
@@ -340,14 +335,18 @@ defmodule CryptoScanner.CoinigyServer do
       prices_diff = max_price - min_price
 
       prices_percentage = if abs(prices_diff) > 0 do
-        ((min_price / max_price) - 1) * 100
+        p = ((min_price / max_price) - 1) * 100
+
+        if max_time > min_time do
+          p * -1
+        else
+          p
+        end
       else
         0
       end
 
-      if max_time > min_time do
-        prices_percentage = prices_percentage * -1
-      end
+
 
       %{
         "min" => min_price,

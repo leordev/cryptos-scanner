@@ -516,7 +516,7 @@ update msg model =
                                         i.time
                                             >= (model.currentTime
                                                     - Time.second
-                                                    * 6
+                                                    * 11
                                                )
                                     )
                                 |> List.length
