@@ -16,6 +16,7 @@ defmodule CryptoScannerWeb.ScannerChannel do
   end
 
   def handle_in("set_filter", body, socket) do
+    Logger.info(">>>>> Setting Filter as #{inspect(body)}")
     socket = assign(socket, :filter, body)
 
     {:noreply, socket}
