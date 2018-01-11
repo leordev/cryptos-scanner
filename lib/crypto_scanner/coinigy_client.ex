@@ -3,6 +3,7 @@ defmodule CryptoScanner.CoinigyClient do
   require Logger
 
   alias CryptoScanner.CoinigyServer
+  alias CryptoScanner.CoinigyChannelServer
 
   def start_link(opts \\ []) do
     url = "wss://sc-02.coinigy.com/socketcluster/"
@@ -43,6 +44,11 @@ defmodule CryptoScanner.CoinigyClient do
     Logger.info("Coinigy Client Connected \n #{inspect(state)}")
 
     {:ok, state}
+  end
+
+  def handle_info(info, state) do
+     Logger.info(">>>>> CoinigyWS INFO >>> \n #{inspect(info)}")
+     {:ok, state}
   end
 
   def emit(pid, msg, data \\ nil) do
@@ -118,15 +124,26 @@ defmodule CryptoScanner.CoinigyClient do
   def handle_publish(res) do
 
     case res["channel"] do
-      "TRADE-" <> _trade_channel ->
+      "TRADE-" <> trade_channel ->
         trade = res["data"]
-        CoinigyServer.tick_price(%{
+
+        CoinigyChannelServer.add_transaction(String.to_atom(trade_channel),
+          %{
             "exchange" => trade["exchange"],
             "label" => trade["label"],
             "price" => trade["price"],
             "quantity" => trade["quantity"],
             "time" => System.os_time,
           })
+
+          # GenServer.whereis(String.to_atom("PLNX--USDT--XRP"))
+        # CoinigyServer.tick_price(%{
+        #     "exchange" => trade["exchange"],
+        #     "label" => trade["label"],
+        #     "price" => trade["price"],
+        #     "quantity" => trade["quantity"],
+        #     "time" => System.os_time,
+        #   })
         # Logger.info(">>> Trade Received >>> #{trade_channel}")
       "ORDER-" <> order_channel ->
         # Logger.info(">>> OrderBook Received >>> #{order_channel}")
@@ -160,7 +177,18 @@ defmodule CryptoScanner.CoinigyClient do
               end
             end)
 
-        CoinigyServer.tick_orders(%{
+        # CoinigyServer.tick_orders(%{
+        #     "exchange" => order["exchange"] || alt_exchange,
+        #     "label" => order["label"] || (alt_base <> "/" <> alt_quote),
+        #     "bid_price" => bid_price,
+        #     "bid_quantity" => bid_quantity,
+        #     "ask_price" => ask_price,
+        #     "ask_quantity" => ask_quantity,
+        #     "time" => System.os_time,
+        #   })
+
+        CoinigyChannelServer.update_orders(String.to_atom(order_channel),
+          %{
             "exchange" => order["exchange"] || alt_exchange,
             "label" => order["label"] || (alt_base <> "/" <> alt_quote),
             "bid_price" => bid_price,
