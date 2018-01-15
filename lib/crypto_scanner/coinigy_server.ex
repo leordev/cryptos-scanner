@@ -117,9 +117,9 @@ defmodule CryptoScanner.CoinigyServer do
       GenServer.call(:coinigy, {:subscribe_to_channels, "HITB", "ETH"})
       GenServer.call(:coinigy, {:subscribe_to_channels, "BINA", "ETH"})
       GenServer.call(:coinigy, {:subscribe_to_channels, "BINA", "BTC"})
-      GenServer.call(:coinigy, {:subscribe_to_channels, "BITF", "BTC"})
-      GenServer.call(:coinigy, {:subscribe_to_channels, "BITF", "ETH"})
-      GenServer.call(:coinigy, {:subscribe_to_channels, "BITF", "USD"})
+      #GenServer.call(:coinigy, {:subscribe_to_channels, "BITF", "BTC"})
+      #GenServer.call(:coinigy, {:subscribe_to_channels, "BITF", "ETH"})
+      #GenServer.call(:coinigy, {:subscribe_to_channels, "BITF", "USD"})
     end
   end
 
