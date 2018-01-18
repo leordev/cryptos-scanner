@@ -22,6 +22,7 @@ const Elm = require("../elm/Main");
 const app = Elm.Main.fullscreen(flags);
 
 const alarmAudio = new Audio('alarms/notification.wav');
+alarmAudio.play();
 
 app.ports.saveUser.subscribe(function(user){
   const data = { user: user, exchanges: [] }
