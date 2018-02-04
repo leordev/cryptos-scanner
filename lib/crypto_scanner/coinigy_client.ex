@@ -150,7 +150,7 @@ defmodule CryptoScanner.CoinigyClient do
 
         order = hd(res["data"])
 
-        [ alt_exchange, alt_base, alt_quote ]
+        [ alt_exchange, alt_base, alt_quote | _ ]
           = order_channel |> String.split("--")
 
         # Logger.info("First Order data #{inspect(order)}")

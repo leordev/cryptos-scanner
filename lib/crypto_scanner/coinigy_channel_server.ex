@@ -16,7 +16,7 @@ defmodule CryptoScanner.CoinigyChannelServer do
   def init(name) do
     Logger.info("***** Starting Channel Subscription #{name}")
 
-    [ exchange, base, quote ] = String.split(to_string(name), "--")
+    [ exchange, base, quote | _ ] = String.split(to_string(name), "--")
 
     state = %{
       "name" => name,

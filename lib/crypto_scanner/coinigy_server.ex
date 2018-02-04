@@ -113,10 +113,12 @@ defmodule CryptoScanner.CoinigyServer do
     # TODO: create an option in UI to set this up
     spawn fn ->
       # GenServer.call(:coinigy, {:subscribe_to_channels, "PLNX", "USD"})
-      GenServer.call(:coinigy, {:subscribe_to_channels, "HITB", "USD"})
+      GenServer.call(:coinigy, {:subscribe_to_channels, "HITB", "BTC"})
       GenServer.call(:coinigy, {:subscribe_to_channels, "HITB", "ETH"})
-      GenServer.call(:coinigy, {:subscribe_to_channels, "BINA", "ETH"})
-      GenServer.call(:coinigy, {:subscribe_to_channels, "BINA", "BTC"})
+      GenServer.call(:coinigy, {:subscribe_to_channels, "HITB", "USD"})
+      # GenServer.call(:coinigy, {:subscribe_to_channels, "BINA", "ETH"})
+      # GenServer.call(:coinigy, {:subscribe_to_channels, "BINA", "BTC"})
+      GenServer.call(:coinigy, {:subscribe_to_channels, "CPIA", "BTC"})
       #GenServer.call(:coinigy, {:subscribe_to_channels, "BITF", "BTC"})
       #GenServer.call(:coinigy, {:subscribe_to_channels, "BITF", "ETH"})
       #GenServer.call(:coinigy, {:subscribe_to_channels, "BITF", "USD"})

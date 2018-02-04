@@ -1437,7 +1437,16 @@ exchangeUrl coin =
                    )
 
         "HITB" ->
-            "https://www.hitbtc.com/exchange/" ++ coin.base ++ "-to-" ++ coin.quote
+            "https://www.hitbtc.com/exchange/"
+                ++ coin.base
+                ++ "-to-"
+                ++ coin.quote
+
+        "CPIA" ->
+            "https://www.cryptopia.co.nz/Exchange/?market="
+                ++ coin.base
+                ++ "_"
+                ++ coin.quote
 
         "PLNX" ->
             "https://poloniex.com/exchange#"
